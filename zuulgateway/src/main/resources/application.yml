@@ -1,0 +1,21 @@
+server:
+  port: 8888
+spring:
+  application:
+    name: zuulgateway
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:6868/eureka
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+zuul:
+  routes:
+    service1:
+      path: /userservice/** #如果这里的path userservice和serviceId不一样，则必须在后面加/**
+      serviceId: microservice-user
+    service2:
+      path: /movieservice/**
+      serviceId: microservice-movie

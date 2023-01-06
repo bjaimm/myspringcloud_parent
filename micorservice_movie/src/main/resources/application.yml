@@ -1,0 +1,28 @@
+server:
+  port: 8002
+spring:
+  application:
+    name: microservice-movie
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/herosoft?characterEncoding=UTF-8
+    username: root
+    password: 123456
+mybatis:
+  mapper-locations: classpath:mappers/**/*.xml
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://127.0.0.1:6868/eureka
+  instance:
+    prefer-ip-address: true
+feign:
+  hystrix:
+    enabled: true
