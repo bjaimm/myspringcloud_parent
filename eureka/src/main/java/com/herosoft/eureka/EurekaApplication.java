@@ -22,8 +22,9 @@ public class EurekaApplication {
         list1.add("tst");
         String o = list1.get(0);
         String cellphone = "234324";
+
         if(cellphone.matches("\\d{6}")){
-            System.out.println("手机号格式正确");
+            System.out.println("手机号格式正确!");
         }
         else{
             System.out.println("手机号格式不正确");
@@ -44,6 +45,12 @@ public class EurekaApplication {
         }*/
         System.out.println("end");
 
+        //策略设计模式演示 Arrays.sort(arg1, arg2); arg2为不同策略
+        String[] arrays = {"apple","Orange","Banana","Pear"};
+        Arrays.sort(arrays,String::compareToIgnoreCase);
+        System.out.println(Arrays.toString(arrays));
+        Arrays.sort(arrays,(s1,s2)->s1.compareTo(s2));
+        System.out.println(Arrays.toString(arrays));
 
         list=Arrays.asList("1","2");
         for (String item:list ) {
