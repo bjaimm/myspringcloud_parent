@@ -27,7 +27,7 @@ public class EurekaApplication {
             System.out.println("手机号格式正确!");
         }
         else{
-            System.out.println("手机号格式不正确");
+            System.out.println("手机号格式不正确!");
         }
         JSONObject jsonObject = JSON.parseObject("{'username':'hanwei','age':'46'}");
         System.out.println("jsonObject username:"+jsonObject.get("username"));
