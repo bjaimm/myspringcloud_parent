@@ -9,5 +9,7 @@ eureka:
     register-with-eureka: false
     service-url:
       defaultZone: http://127.0.0.1:6868/eureka
+  instance:
+    ip-address: 127.0.0.1
 encrypt:
   key: sdsie@dhfafdJkskfk188829fdjkasfha
