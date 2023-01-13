@@ -75,6 +75,7 @@ public class UserController {
             System.out.println("发送消息失败，exception:"+failure.getMessage());
         });
     }
+
     @GetMapping("/countTest")
     @ApiOperation(value = "计数器")
     public String countTest(){
