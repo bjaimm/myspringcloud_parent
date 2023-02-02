@@ -1,0 +1,56 @@
+server:
+  port: 8101
+spring:
+  application:
+    name: microservice-user
+  jpa:
+    database: mysql
+    generate-ddl: true
+    show-sql: true
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/herosoft?characterEncoding=UTF-8
+    username: root
+    password: 123456
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  kafka:
+    properties:
+      request.timeout.ms: 180000
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      retries: 0
+      acks: 1
+      batch:
+        size: 16384
+      linger: 1
+      buffer:
+        memory: 33554432
+    consumer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      enable-auto-commit: true
+      group-id: microservice-user-group
+      auto-offset-reset: latest
+    bootstrap-servers: kafka:9092
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6868/eureka
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+mybatis:
+  mapper-locations: classpath:mappers/**/*.xml
+token:
+  secret: changedagain!!!!!!!okokok
+network:
+  kafka:
+    ip: kafka
+    port: 9092
+

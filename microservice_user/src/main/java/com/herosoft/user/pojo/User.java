@@ -1,6 +1,7 @@
 package com.herosoft.user.pojo;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 @Entity
 @Table(name = "user")
@@ -8,6 +9,7 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @NotBlank(message = "用户名不可以为空")
     private String username;
 
     @Override

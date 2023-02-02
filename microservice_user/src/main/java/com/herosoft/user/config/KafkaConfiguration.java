@@ -14,8 +14,10 @@ import java.util.Map;
 @Configuration
 @EnableKafka
 public class KafkaConfiguration {
-
-    private static final Map<String, Object> kafkaProps = new HashMap<>();
+    /**
+     * kafka props
+     */
+    private static final Map<String, Object> KAFKA_PROPS = new HashMap<>();
 
     private static String ip;
 
@@ -57,23 +59,23 @@ public class KafkaConfiguration {
      */
     public static void initConsumer() {
         //连接地址
-        kafkaProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, ip + ":" + port);
+        KAFKA_PROPS.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, ip + ":" + port);
         //GroupID
-        kafkaProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        KAFKA_PROPS.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         //是否自动提交
-        kafkaProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, autoCommit);
+        KAFKA_PROPS.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, autoCommit);
         //键的反序列化方式
-        kafkaProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        KAFKA_PROPS.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         //值的反序列化方式
-        kafkaProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        KAFKA_PROPS.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         // 从何处开始消费,latest 表示消费最新消息,earliest 表示从头开始消费,none表示抛出异常,默认latest
-        kafkaProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
+        KAFKA_PROPS.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
     }
 
     @Bean
     public KafkaConsumer<String, String> getKafkaConsumer() {
         initConsumer();
-        return new KafkaConsumer<>(kafkaProps);
+        return new KafkaConsumer<>(KAFKA_PROPS);
     }
 
 }

@@ -1,35 +1,49 @@
 package com.herosoft.user;
 
-import com.herosoft.user.controller.UserController;
-import com.herosoft.user.test.PingIp;
-import com.herosoft.user.thread.ExtendedThread;
-import com.herosoft.user.thread.MultiThreadPing;
-import com.herosoft.user.thread.RunnableThread;
-import com.herosoft.user.thread.YieldThread;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.PartitionInfo;
-import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.herosoft.user.proxy.JdkDynamicProxy;
+import com.herosoft.user.proxy.Person;
+import com.herosoft.user.proxy.StudentStaticProxy;
+import com.herosoft.user.proxy.Student;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.lang.reflect.Proxy;
 
 @SpringBootApplication
+@EnableEurekaClient
+@EnableScheduling
+@EnableAsync
+@EnableTransactionManagement
 public class UserApplication {
 
     public static void main(String[] args) {
 
         SpringApplication.run(UserApplication.class,args);
+
+        //创建被代理对象
+        Person student = new Student("张三");
+        //创建动态代理
+        JdkDynamicProxy proxy = new JdkDynamicProxy(student);
+
+        //创建代理对象实列
+        Person studentDynamicProxy = (Person) Proxy.newProxyInstance(proxy.getClass().getClassLoader(),
+                //new Class[]{Person.class},
+                student.getClass().getInterfaces(),
+                proxy);
+
+        studentDynamicProxy.wakeup();
+        studentDynamicProxy.sleep();
+        studentDynamicProxy.eat("苹果");
+
+        Person studentStaticProxy = new StudentStaticProxy(new Student("李四"));
+
+        studentStaticProxy.wakeup();
+        studentStaticProxy.sleep();
+        studentStaticProxy.eat("苹果");
 
 /*
         List<String> topics = new ArrayList<>();

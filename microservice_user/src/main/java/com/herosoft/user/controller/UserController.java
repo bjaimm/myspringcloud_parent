@@ -1,22 +1,34 @@
 package com.herosoft.user.controller;
 
+import com.herosoft.user.annotations.NotControllerResponseAdvice;
+import com.herosoft.user.annotations.TakeLog;
+import com.herosoft.user.async.AsyncService;
+import com.herosoft.user.dto.UserDto;
+import com.herosoft.user.enums.ResponseEnum;
+import com.herosoft.user.events.ObservationEvent;
+import com.herosoft.user.exceptions.DefinitionException;
 import com.herosoft.user.pojo.User;
+import com.herosoft.user.result.Result;
+import com.herosoft.user.service.RabbitMqSender;
 import com.herosoft.user.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.SuccessCallback;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -27,7 +39,10 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/users")
 @Api(value = "用户管理接口")
 public class UserController {
-
+    /**
+     * lock retry time
+     */
+    private final static Integer LOCK_RETRY_TIME=5;
     @Autowired
     private UserService userService;
 
@@ -35,8 +50,18 @@ public class UserController {
     private KafkaTemplate kafkaTemplate;
 
     @Autowired
+    private RabbitMqSender rabbitMqSender;
+
+    @Autowired
     private Environment environment;
 
+    @Autowired
+    private AsyncService asyncService;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    private static Map<String,String> staticMap = new HashMap<>();
     private Integer count=0;
     private Lock lock=new ReentrantLock();
 
@@ -80,12 +105,19 @@ public class UserController {
     @ApiOperation(value = "计数器")
     public String countTest(){
         count++;
+
+        staticMap.put(String.valueOf(count),"count"+count);
+
+        for(Map.Entry<String,String> entry: staticMap.entrySet()){
+            System.out.println("key:"+entry.getKey()+"  value:"+entry.getValue());
+        };
         return String.valueOf(count);
     }
 
     public void threadMethod(Thread thread) throws InterruptedException {
+        ///lock() method only try to get lock for once
         //lock.lock();
-        if(lock.tryLock(5,TimeUnit.SECONDS)) {
+        if(lock.tryLock(LOCK_RETRY_TIME,TimeUnit.SECONDS)) {
             try {
                 System.out.println("线程" + thread.getName() + "执行中。。。");
                 Thread.sleep(3000);
@@ -99,19 +131,25 @@ public class UserController {
     }
 
     @RequestMapping(value = "/checkstatus",method = RequestMethod.GET)
+    @NotControllerResponseAdvice
     public String getStatus(){
 
         return "用户微服务状态正常 Port:"+environment.getProperty("local.server.port")+" token secret:"+environment.getProperty("token.secret");
+    }
+    @RequestMapping(value = "/userhandler/{userType}")
+    public String userHandler(@PathVariable String userType){
+        UserDto userDto = new UserDto();
+        userDto.setId(1);
+        userDto.setUserName("普通用户");
+        userDto.setUserType(userType);
+
+        return userService.handler(userDto);
+
     }
     @RequestMapping(method = RequestMethod.GET)
     public List<User> findAllUsers(){
 
         List<User> userList = new ArrayList<User>();
-
-        /*userList.add(new User(1,"张三","123456","男",2000.0));
-        userList.add(new User(2,"李四","123456","男",3000.0));
-        userList.add(new User(3,"王五","123456","女",4000.0));
-        */
 
         userList=userService.findAll();
         //模拟服务调用延时
@@ -126,12 +164,14 @@ public class UserController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public String add(@RequestBody User user){
+    public Result add(@RequestBody @Valid User user){
         userService.add(user);
-        return "添加用户成功";
+
+        return new Result<>(true, ResponseEnum.SUUCESS.getReponseCode(), ResponseEnum.SUUCESS.getReponseMessage(), "添加用户成功");
     }
 
     @RequestMapping(value = "/{id}",method = RequestMethod.GET)
+    @TakeLog
     public User findById(@PathVariable  Integer id){
         System.out.println("正在查询用户。。。");
         return userService.findById(id);
@@ -141,5 +181,59 @@ public class UserController {
     public String deleteById(@PathVariable  Integer id){
         userService.delete(id);
         return "删除成功";
+    }
+
+    @GetMapping(value = "/asyncCall")
+    public String asyncCall(){
+        long startTime = System.currentTimeMillis();
+
+        asyncService.helloAsync();
+        long endTime = System.currentTimeMillis();
+        System.out.println("Controller asyncCall执行用时:"+(endTime-startTime)+"毫秒");
+        return "Success";
+
+    }
+    @GetMapping("/getDefineException")
+    public Result getDefineException(){
+        throw new DefinitionException(400,"我出错了");
+    }
+
+    @GetMapping("/getOtherException")
+    public Result getOtherException(){
+        int temp = 10/0;
+        return new Result<>();
+    }
+
+    @GetMapping("/rabbitmq/dlkSend")
+    public Result dlkSend(@RequestParam String message, Integer delay){
+        UserDto userDto = new UserDto();
+        userDto.setId(0);
+        userDto.setUserName(message);
+        userDto.setUserType("1");
+
+
+        rabbitMqSender.sendObjectDemo(userDto,delay);
+        return new Result<>(true,
+                ResponseEnum.SUUCESS.getReponseCode(),
+                ResponseEnum.SUUCESS.getReponseMessage(),
+                "使用死信队列发送消息成功");
+    }
+
+    @GetMapping("/rabbitmq/delayPluginSend")
+    public Result delayPluginSend(@RequestParam String message, Integer delay){
+        rabbitMqSender.sendDelayPlugin(message,delay);
+        return new Result<>(true,
+                ResponseEnum.SUUCESS.getReponseCode(),
+                ResponseEnum.SUUCESS.getReponseMessage(),
+                "使用延时插件队列发送消息成功");
+    }
+
+    @GetMapping("/publishevent/{message}")
+    public Result publishEvent(@PathVariable String message){
+        applicationContext.publishEvent(new ObservationEvent(message));
+        return new Result<>(true,
+                ResponseEnum.SUUCESS.getReponseCode(),
+                ResponseEnum.SUUCESS.getReponseMessage(),
+                "使用ApplicatonContext发送Event消息成功");
     }
 }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.herosoft.user.mappers.UserMapper">
+
+    <resultMap id="User" type="com.herosoft.user.pojo.User" >
+        <result column="id" property="id" />
+        <result column="username" property="username" />
+        <result column="balance" property="balance" />
+        <result column="sex" property="sex" />
+        <result column="password" property="password" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        t.id,
+        t.username,
+        t.password,
+        t.sex,
+        t.balance
+    </sql>
+
+    <insert id="add" parameterType="com.herosoft.user.pojo.User" useGeneratedKeys="true" keyProperty="id" >
+        INSERT INTO user (
+        `username`,
+        `password`,
+        `sex`,
+        `balance`
+        ) VALUES (
+        #{username},
+        #{password},
+        #{sex},
+        #{balance}
+        );
+    </insert>
+
+    <update id="update" parameterType="com.herosoft.user.pojo.User" >
+        UPDATE user
+        SET
+        `username` = #{username},
+        `password` = #{password},
+        `sex` = #{sex},
+        `balance` = #{balance}
+        WHERE id = #{id}
+    </update>
+    <delete id="delete" parameterType="java.lang.Integer" >
+        DELETE FROM user
+        WHERE id = #{id}
+    </delete>
+
+    <select id="load" parameterType="java.lang.Integer" resultMap="User">
+        SELECT <include refid="Base_Column_List" />
+        FROM user AS t
+        WHERE t.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="User">
+        SELECT <include refid="Base_Column_List" />
+        FROM user as t
+    </select>
+
+</mapper>
