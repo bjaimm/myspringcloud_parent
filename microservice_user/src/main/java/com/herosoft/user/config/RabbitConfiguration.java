@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.messaging.converter.MessageConverter;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,33 +23,32 @@ import java.util.Map;
 @PropertySource(value = "classpath:rabbitmq-cfg.properties")
 public class RabbitConfiguration {
 
-    @Value("${dlk.exchange}")
-    public final static String DLK_EXCHANGE="dlkExchange";
+    public static String DLK_EXCHANGE;
 
-    @Value("${dlk.routekey}")
-    public final static String DLK_ROUTEKEY="dlkRouteKey";
+    public static String DLK_ROUTEKEY;
 
-    @Value("${dlk.queue}")
     public final static String DLK_QUEUE="dlkQueue";
 
+    public  static String DEMO_EXCHANGE;
 
-    @Value("${demo.exchange}")
-    public  final static String DEMO_EXCHANGE="demoExchange";
+    public static String DEMO_ROUTEKEY;
 
-    @Value("${demo.routekey}")
-    public final static String DEMO_ROUTEKEY="demoRouteKey";
+    public static String DEMO_QUEUE;
 
-    @Value("${demo.queue}")
-    public final static String DEMO_QUEUE="demoQueue";
+    /**
+     * 对于静态变量，@value需要加在set方法，且方法不能用static修饰符
+     *
+     * @param demoQueue
+     */
+    @Value("${demo.queue:demoQueue}")
+    public void setDemoQueue(String demoQueue) {
+        DEMO_QUEUE = demoQueue;
+    }
 
+    public static String DELAYPLUGIN_EXCHANGE;
 
-    @Value("${delayplugin.exchange}")
-    public final static String DELAYPLUGIN_EXCHANGE="delayPluginExchange";
+    public static String DELAYPLUGIN_ROUTEKEY;
 
-    @Value("${delayplugin.routekey}")
-    public final static String DELAYPLUGIN_ROUTEKEY="delayPluginRouteKey";
-
-    @Value("${delayplugin.queue}")
     public final static String DELAYPLUGIN_QUEUE="delayPluginQueue";
 
     @Bean
@@ -130,4 +127,39 @@ public class RabbitConfiguration {
         return  new Jackson2JsonMessageConverter();
     }
 
+    /**
+     * 对于静态变量，@value需要加在set方法，且方法不能用static修饰符
+     *
+     * @param dlkExchange
+     *
+     */
+    @Value("${dlk.exchange:dlkExchange}")
+    public void setDlkExchange(String dlkExchange) {
+        DLK_EXCHANGE = dlkExchange;
+    }
+
+    @Value("${dlk.routekey:dlkRouteKey}")
+    public void setDlkRoutekey(String dlkRoutekey) {
+        DLK_ROUTEKEY = dlkRoutekey;
+    }
+
+    @Value("${demo.exchange:demoExchange}")
+    public void setDemoExchange(String demoExchange) {
+        DEMO_EXCHANGE = demoExchange;
+    }
+
+    @Value("${demo.routekey:demoRouteKey}")
+    public void setDemoRoutekey(String demoRoutekey) {
+        DEMO_ROUTEKEY = demoRoutekey;
+    }
+
+    @Value("${delayplugin.exchange:delayPluginExchange}")
+    public void setDelaypluginExchange(String delaypluginExchange) {
+        DELAYPLUGIN_EXCHANGE = delaypluginExchange;
+    }
+
+    @Value("${delayplugin.routekey:delayPluginRouteKey}")
+    public void setDelaypluginRoutekey(String delaypluginRoutekey) {
+        DELAYPLUGIN_ROUTEKEY = delaypluginRoutekey;
+    }
 }

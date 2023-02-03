@@ -1,11 +1,15 @@
 import com.herosoft.user.UserApplication;
+import com.herosoft.user.dto.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,7 +28,10 @@ import java.util.stream.Stream;
 public class TestCases {
 
     public static final String B = "b";
-    
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -43,7 +50,7 @@ public class TestCases {
                 .accept(MediaType.TEXT_HTML))
                 .andReturn()
                 .getResponse().getContentAsString();
-        log.info("获取到的Token:"+token);
+        log.info("获取到的Token:{}"+token);
         Assert.assertEquals("用户微服务状态正常 Port:null token secret:changedagain!!!!!!!okokok",token);
     }
     @Test
@@ -331,9 +338,107 @@ public class TestCases {
                 iterator.remove();
             }
         }
-        System.out.println("清理后的List size:"+list1.size());
+        log.info("清理后的List size:{}",list1.size());
+
     }
 
+    @Test
+    public void testRedisSet(){
+        ValueOperations ops = redisTemplate.opsForValue();
+        ops.set("firstkey","2");
+    }
+
+    @Test
+    public void testRedisGet(){
+        ValueOperations ops = redisTemplate.opsForValue();
+        consoleLog(ops.get("firstkey").toString());
+    }
+
+    @Test
+    public void testRedisHashSet(){
+        HashOperations opsForHash = redisTemplate.opsForHash();
+        opsForHash.put("user","name","Tom");
+        opsForHash.put("user","age","12");
+    }
+
+    @Test
+    public void testRedisHashGet(){
+        HashOperations opsForHash = redisTemplate.opsForHash();
+        consoleLog(opsForHash.get("user","name").toString());
+
+        consoleLog(opsForHash.keys("user").toString());
+        consoleLog(opsForHash.values("user").toString());
+        consoleLog(opsForHash.entries("user").toString());
+    }
+
+    @Test
+    public void testRedisListSet(){
+        ListOperations opsForList = redisTemplate.opsForList();
+        UserDto userDto = new UserDto();
+        userDto.setId(0);
+        userDto.setUserName("Tom");
+        userDto.setUserType("0");
+
+        opsForList.leftPush("userlist",userDto);
+
+        userDto.setId(1);
+        userDto.setUserName("Jack");
+        userDto.setUserType("1");
+
+        opsForList.leftPush("userlist",userDto);
+
+    }
+
+    @Test
+    public void testRedisListGet(){
+        ListOperations opsForList = redisTemplate.opsForList();
+        consoleLog(opsForList.leftPop("userlist").toString());
+    }
+
+    @Test
+    public void testRedisSetSet(){
+        SetOperations opsForSet = redisTemplate.opsForSet();
+        UserDto userDto = new UserDto();
+        userDto.setId(0);
+        userDto.setUserName("Mary");
+        userDto.setUserType("0");
+
+        opsForSet.add("userset",userDto);
+
+        userDto.setId(1);
+        userDto.setUserName("Rose");
+        userDto.setUserType("1");
+
+        opsForSet.add("userset",userDto);
+    }
+
+    @Test
+    public void testRedisSetGet(){
+        SetOperations opsForSet = redisTemplate.opsForSet();
+
+        consoleLog(opsForSet.pop("userset").toString());
+    }
+
+    @Test
+    public void testRedisZsetSet(){
+        ZSetOperations opsForZSet = redisTemplate.opsForZSet();
+
+        opsForZSet.add("zset","a",8);
+        opsForZSet.add("zset","b",6);
+        opsForZSet.add("zset","c",1);
+        opsForZSet.add("zset","d",3);
+
+    }
+
+    @Test
+    public void testRedisZsetGet(){
+        ZSetOperations opsForZSet = redisTemplate.opsForZSet();
+
+        consoleLog(opsForZSet.range("zset",0,3).toString());
+        opsForZSet.incrementScore("zset","c",6);
+        consoleLog(opsForZSet.range("zset",0,3).toString());
+
+    }
     public static void main(String[] args) {
         String message = "Main method 开始执行。。。";
         consoleLog(message);

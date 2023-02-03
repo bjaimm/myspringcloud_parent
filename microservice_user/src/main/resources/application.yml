@@ -7,6 +7,10 @@ spring:
     database: mysql
     generate-ddl: true
     show-sql: true
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/herosoft?characterEncoding=UTF-8
