@@ -1,7 +1,7 @@
 package com.herosoft.movie.controller;
 
 import com.herosoft.movie.client.UserService;
-import com.herosoft.movie.pojo.User;
+import com.herosoft.movie.dto.UserDto;
 import com.herosoft.movie.service.TicketService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -156,7 +156,7 @@ public class MovieController {
         //模拟当前用户购票
         Integer id=1;
 
-        User user;
+        UserDto user;
 
         user=userService.findById(id);
         System.out.println(user+"正在购票。。。");

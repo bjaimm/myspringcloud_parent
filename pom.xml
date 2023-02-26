@@ -16,7 +16,10 @@
         <module>zuulgateway</module>
         <module>microservice_product</module>
         <module>springcloudconfig</module>
-        <module>spring_cloud_gateway</module>
+        <module>microservice_gateway</module>
+        <module>microservice_order</module>
+        <module>microservice_commons</module>
+        <module>microservice_security</module>
     </modules>
 
     <properties>

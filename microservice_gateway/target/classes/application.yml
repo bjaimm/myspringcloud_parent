@@ -1,0 +1,57 @@
+server:
+  port: 8888
+spring:
+  application:
+    name: microservice-gateway
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/herosoft?characterEncoding=UTF-8
+    username: root
+    password: 123456
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: SecurityService
+          uri: lb://microservice-security
+          predicates:
+            - Path=/security/**
+        - id: ProductService
+          uri: lb://microservice-product
+          predicates:
+            - Path=/products/**
+        - id: OrderService
+          uri: lb://microservice-order
+          predicates:
+            - Path=/orders/**
+            - After=2023-02-16T10:05:00.000+08:00[Asia/Shanghai]
+        - id: UserService
+          uri: lb://microservice-user
+          predicates:
+            - Path=/users/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@ipKeyResolver}"
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 1
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+  main:
+    web-application-type: reactive
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://127.0.0.1:6868/eureka
+  instance:
+    prefer-ip-address: true
+logging:
+  level:
+    root: debug
+

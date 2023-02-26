@@ -1,12 +1,15 @@
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.herosoft.commons.dto.UserDto;
 import com.herosoft.user.UserApplication;
-import com.herosoft.user.dto.UserDto;
+import com.herosoft.user.mappers.UserMapper;
+import com.herosoft.user.po.UserPo;
+import com.herosoft.user.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.*;
@@ -16,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import reactor.core.publisher.Flux;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -34,6 +38,12 @@ public class TestCases {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private UserServiceImpl userServiceImpl;
 
     private MockMvc mockMvc;
 
@@ -73,7 +83,21 @@ public class TestCases {
             });
         }
     }
+    @Test
+    public void testFlux(){
+        Flux.create(fluxSink -> {
+            fluxSink.next("test1");
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            fluxSink.next("test2");
+            fluxSink.complete();
+        }).subscribe(System.out::println);
 
+        System.out.println("主线程结束");
+    }
     @Test
     public void testFixedThreadPool() {
         ExecutorService executorService = Executors.newFixedThreadPool(4);
@@ -238,6 +262,8 @@ public class TestCases {
         List<Integer> list3 = Arrays.asList(18,18,29,32,2,29,1,32,100);
         consoleLog("利用distinct去重stream:");
         list3.stream().distinct().forEach(System.out::println);
+        list3=list3.stream().distinct().collect(Collectors.toList());
+        System.out.println("利用stream distinct去重后的list:"+list3);
 
         //7.skip limit demo
         List<Integer> list4 = Arrays.asList(18,18,29,32,2,29,1,32,100);
@@ -314,18 +340,30 @@ public class TestCases {
         }
     }
     @Test
-    public void testCorrectWay1ToRemoveItemFromList(){
-        List<String> list1 = new ArrayList<>(Arrays.asList("apple","banana","pineapple","orange"));
+    public void testWrongWay4ToRemoveItemFromList(){
+        List<String> list1 = new ArrayList<>(Arrays.asList("张三", "李四","李四", "周一", "刘四", "李强", "李白"));
 
-        //这种方法每次都调用size，执行性能有影响，不推荐
+        //这种方法每次都调用size，虽然不会报错，但有可能漏删，且执行性能有影响
         for(int i =0;i<list1.size();i++){
             String item = list1.get(i);
 
-            if(item.contains("b")){
+            if(item.contains("李")){
                 list1.remove(i);
             }
         }
+        System.out.println("清理后的List:"+list1);
         System.out.println("清理后的List size:"+list1.size());
+
+    }
+    @Test()
+    public void testCorrectWay1ToRemoveItemFromList(){
+        List<String> list1 = new ArrayList<>(Arrays.asList("张三", "李四","李四", "周一", "刘四", "李强", "李白"));
+
+        list1=list1.stream().filter(e->!e.contains("李")).collect(Collectors.toList());
+
+        System.out.println("清理后的List:"+list1);
+        log.info("清理后的List size:{}",list1.size());
+
     }
     @Test()
     public void testCorrectWay2ToRemoveItemFromList(){
@@ -375,13 +413,13 @@ public class TestCases {
     public void testRedisListSet(){
         ListOperations opsForList = redisTemplate.opsForList();
         UserDto userDto = new UserDto();
-        userDto.setId(0);
+        userDto.setUserId(0);
         userDto.setUserName("Tom");
         userDto.setUserType("0");
 
         opsForList.leftPush("userlist",userDto);
 
-        userDto.setId(1);
+        userDto.setUserId(1);
         userDto.setUserName("Jack");
         userDto.setUserType("1");
 
@@ -399,13 +437,13 @@ public class TestCases {
     public void testRedisSetSet(){
         SetOperations opsForSet = redisTemplate.opsForSet();
         UserDto userDto = new UserDto();
-        userDto.setId(0);
+        userDto.setUserId(0);
         userDto.setUserName("Mary");
         userDto.setUserType("0");
 
         opsForSet.add("userset",userDto);
 
-        userDto.setId(1);
+        userDto.setUserId(1);
         userDto.setUserName("Rose");
         userDto.setUserType("1");
 
@@ -428,6 +466,7 @@ public class TestCases {
         opsForZSet.add("zset","c",1);
         opsForZSet.add("zset","d",3);
 
+
     }
 
     @Test
@@ -438,6 +477,126 @@ public class TestCases {
         opsForZSet.incrementScore("zset","c",6);
         consoleLog(opsForZSet.range("zset",0,3).toString());
 
+    }
+
+    @Test
+    public void testSelectUserMapper(){
+        List<UserPo> userList = userMapper.selectList(null);
+
+        //Assert.assertEquals(4,userList.size());
+
+        userList.forEach(System.out::println);
+    }
+
+    @Test
+    public void testAddUsers(){
+        UserPo user = new UserPo();
+
+        user.setUsername("韩八");
+        user.setPassword("123456");
+        user.setBalance(4000.00);
+        user.setSex("男");
+
+        userServiceImpl.save(user);
+
+        userServiceImpl.list().forEach(System.out ::println );
+    }
+    @Test
+    public void testAddUsersByBatch(){
+        UserPo user1 = new UserPo();
+        UserPo user2 = new UserPo();
+        List<UserPo> userList = new ArrayList<>();
+
+        user1.setUsername("张二");
+        user1.setPassword("123456");
+        user1.setBalance(3000.00);
+        user1.setSex("男");
+
+        userList.add(user1);
+
+        user2.setUsername("张四");
+        user2.setPassword("123456");
+        user2.setBalance(2000.00);
+        user2.setSex("女");
+
+        userList.add(user2);
+
+        userServiceImpl.saveBatch(userList);
+
+        userServiceImpl.list().forEach(System.out ::println );
+    }
+    @Test
+    public void testAddUsersByBatchSql(){
+        UserPo user1 = new UserPo();
+        UserPo user2 = new UserPo();
+        List<UserPo> userList = new ArrayList<>();
+
+        user1.setUsername("张二");
+        user1.setPassword("123456");
+        user1.setBalance(5000.00);
+        user1.setSex("男");
+
+        userList.add(user1);
+
+        user2.setUsername("张九");
+        user2.setPassword("123456");
+        user2.setBalance(7000.00);
+        user2.setSex("女");
+
+        userList.add(user2);
+
+        userServiceImpl.saveBatchBySql(userList);
+
+        userServiceImpl.list().forEach(System.out ::println );
+    }
+
+    @Test
+    public void testQueryWrapper(){
+        QueryWrapper<UserPo> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.eq("username","李九")
+                .between("balance",1000.00,9000.00)
+                .select("username","balance")
+                .orderByDesc("balance");
+
+        userServiceImpl.list(userQueryWrapper).forEach(System.out ::println );
+    }
+    @Test
+    public void  testUpdateWrapper(){
+        UpdateWrapper<UserPo> userUpdateWrapper = new UpdateWrapper<>();
+        UpdateWrapper<UserPo> userUpdateWrapper2 = new UpdateWrapper<>();
+        UserPo user = new UserPo();
+        //方法一 这种方法不会触发POJO对象的字段的自动填充设置@TableField(fill=XXXX)
+        userUpdateWrapper.eq("username","张三")
+                .set("balance",550.00);
+        userServiceImpl.update(null,userUpdateWrapper);
+
+        //方法二 这种方法可以触发POJO对象的字段的自动填充设置@TableField(fill=XXXX)
+        userUpdateWrapper2.eq("sex","男")
+                        .or().eq("sex","女");
+        user.setPassword("12345678");
+
+        userServiceImpl.update(user,userUpdateWrapper2);
+
+        userServiceImpl.list().forEach(System.out::println);
+    }
+    @Test
+    public void testUpdateUsers(){
+        UserPo user = new UserPo();
+
+        user= userServiceImpl.findById(3);
+        user.setBalance(4000.00);
+
+        userServiceImpl.update(user);
+        userServiceImpl.list().forEach(System.out ::println );
+    }
+    @Test
+    public void testFindUsersSelective(){
+        UserDto userCriteria = new UserDto();
+
+        //userCriteria.setBalance(4000.00);
+        userCriteria.setUserName("王五");
+
+        userServiceImpl.findUsersSelective(userCriteria).forEach(System.out::println);
     }
     public static void main(String[] args) {
         String message = "Main method 开始执行。。。";

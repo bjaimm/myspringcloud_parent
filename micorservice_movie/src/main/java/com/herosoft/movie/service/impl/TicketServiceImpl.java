@@ -1,7 +1,7 @@
 package com.herosoft.movie.service.impl;
 
 import com.herosoft.movie.dao.TicketMapper;
-import com.herosoft.movie.model.Ticket;
+import com.herosoft.movie.po.TicketPo;
 import com.herosoft.movie.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,17 +14,17 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public int decreaseTicketNumberById(Integer id) {
-        Ticket ticket = ticketMapper.load(id);
+        TicketPo ticketPo = ticketMapper.load(id);
 
-        ticket.setNumber(ticket.getNumber()-1);
+        ticketPo.setNumber(ticketPo.getNumber()-1);
 
-        return ticketMapper.update(ticket);
+        return ticketMapper.update(ticketPo);
     }
 
     @Override
     public String showTicket(Integer id) {
-        Ticket ticket = ticketMapper.load(id);
+        TicketPo ticketPo = ticketMapper.load(id);
 
-        return "当前电影"+ticket.getMoviename()+"剩余"+ticket.getNumber()+"张票";
+        return "当前电影"+ ticketPo.getMoviename()+"剩余"+ ticketPo.getNumber()+"张票";
     }
 }

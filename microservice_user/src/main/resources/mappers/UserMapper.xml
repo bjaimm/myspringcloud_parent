@@ -3,12 +3,14 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.herosoft.user.mappers.UserMapper">
 
-    <resultMap id="User" type="com.herosoft.user.pojo.User" >
+    <resultMap id="User" type="com.herosoft.user.po.UserPo" >
         <result column="id" property="id" />
         <result column="username" property="username" />
         <result column="balance" property="balance" />
         <result column="sex" property="sex" />
         <result column="password" property="password" />
+        <result column="createdt" property="createdt"/>
+        <result column="updatedt" property="updatedt"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -16,10 +18,13 @@
         t.username,
         t.password,
         t.sex,
-        t.balance
+        t.balance,
+        t.createdt,
+        t.updatedt,
+        t.version
     </sql>
 
-    <insert id="add" parameterType="com.herosoft.user.pojo.User" useGeneratedKeys="true" keyProperty="id" >
+    <insert id="add" parameterType="com.herosoft.user.po.UserPo" useGeneratedKeys="true" keyProperty="id" >
         INSERT INTO user (
         `username`,
         `password`,
@@ -33,7 +38,7 @@
         );
     </insert>
 
-    <update id="update" parameterType="com.herosoft.user.pojo.User" >
+    <update id="updateBySql" parameterType="com.herosoft.user.po.UserPo" >
         UPDATE user
         SET
         `username` = #{username},
@@ -57,5 +62,38 @@
         SELECT <include refid="Base_Column_List" />
         FROM user as t
     </select>
+
+    <select id="findUsersSelective" parameterType="com.herosoft.commons.dto.UserDto" resultMap="User">
+        SELECT <include refid="Base_Column_List" />
+        FROM user as t
+        <where>
+            <if test="userName!=null and userName!=''">
+                and t.username = #{userName}
+            </if>
+            <if test="balance!=null">
+                and t.balance = #{balance}
+            </if>
+        </where>
+    </select>
+
+    <insert id="saveBatchBySql" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (
+        username,
+        password,
+        sex,
+        balance,
+        createdt,
+        updatedt
+        ) VALUES
+        <foreach collection="userList" separator="," item="user" >
+            (#{user.username},
+            #{user.password},
+            #{user.sex},
+            #{user.balance},
+            #{user.createdt},
+            #{user.updatedt})
+        </foreach>
+
+    </insert>
 
 </mapper>

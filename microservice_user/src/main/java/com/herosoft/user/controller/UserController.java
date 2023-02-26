@@ -1,22 +1,24 @@
 package com.herosoft.user.controller;
 
-import com.herosoft.user.annotations.NotControllerResponseAdvice;
-import com.herosoft.user.annotations.TakeLog;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.herosoft.commons.annotations.NotControllerResponseAdvice;
+import com.herosoft.commons.dto.UserDto;
+import com.herosoft.commons.enums.ResponseEnum;
+import com.herosoft.commons.exceptions.DefinitionException;
+import com.herosoft.commons.results.Result;
 import com.herosoft.user.async.AsyncService;
-import com.herosoft.user.dto.UserDto;
-import com.herosoft.user.enums.ResponseEnum;
 import com.herosoft.user.events.ObservationEvent;
-import com.herosoft.user.exceptions.DefinitionException;
-import com.herosoft.user.pojo.User;
-import com.herosoft.user.result.Result;
+import com.herosoft.user.po.UserPo;
 import com.herosoft.user.service.RabbitMqSender;
-import com.herosoft.user.service.UserService;
+import com.herosoft.user.service.impl.UserServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +27,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -44,7 +43,7 @@ public class UserController {
      */
     private final static Integer LOCK_RETRY_TIME=5;
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @Autowired
     private KafkaTemplate kafkaTemplate;
@@ -100,7 +99,13 @@ public class UserController {
             System.out.println("发送消息失败，exception:"+failure.getMessage());
         });
     }
-
+    @GetMapping("/deadLock/{id}")
+    public String deadLock(@PathVariable int id){
+        while(id==1){
+            System.out.println("这是一个死循环。。。");
+        }
+        return "死循环结束了。。。";
+    }
     @GetMapping("/countTest")
     @ApiOperation(value = "计数器")
     public String countTest(){
@@ -130,8 +135,8 @@ public class UserController {
         }
     }
 
-    @RequestMapping(value = "/checkstatus",method = RequestMethod.GET)
     @NotControllerResponseAdvice
+    @RequestMapping(value = "/checkstatus",method = RequestMethod.GET)
     public String getStatus(){
 
         return "用户微服务状态正常 Port:"+environment.getProperty("local.server.port")+" token secret:"+environment.getProperty("token.secret");
@@ -139,47 +144,67 @@ public class UserController {
     @RequestMapping(value = "/userhandler/{userType}")
     public String userHandler(@PathVariable String userType){
         UserDto userDto = new UserDto();
-        userDto.setId(1);
+        userDto.setUserId(1);
         userDto.setUserName("普通用户");
         userDto.setUserType(userType);
 
-        return userService.handler(userDto);
+        return userServiceImpl.handler(userDto);
 
     }
     @RequestMapping(method = RequestMethod.GET)
-    public List<User> findAllUsers(){
+    public List<UserDto> findAllUsers(){
 
-        List<User> userList = new ArrayList<User>();
+        List<UserDto> userList = Optional.ofNullable(userServiceImpl.findAll())
+                .map(list -> list.stream()
+                        .map(userPo ->{
+                            UserDto user = new UserDto();
 
-        userList=userService.findAll();
-        //模拟服务调用延时
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        userList=userList.stream().filter((m)-> m.getBalance()<3000.0).collect(Collectors.toList());
-        //return userList;
+                            user.setUserId(userPo.getId());
+                            user.setUserName(userPo.getUsername());
+                            user.setBalance(userPo.getBalance());
+                            user.setPassword(userPo.getPassword());
+                            user.setSex(userPo.getSex());
+                            user.setUserType("1");
+                            user.setCreateDt(userPo.getCreatedt());
+                            user.setUpdateDt(userPo.getUpdatedt());
+                            return user;})
+                        .collect(Collectors.toList()))
+                .orElse(new ArrayList<UserDto>());
+
         return userList;
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public Result add(@RequestBody @Valid User user){
-        userService.add(user);
+    public Result add(@RequestBody @Valid UserPo user){
+        userServiceImpl.add(user);
 
         return new Result<>(true, ResponseEnum.SUUCESS.getReponseCode(), ResponseEnum.SUUCESS.getReponseMessage(), "添加用户成功");
     }
 
-    @RequestMapping(value = "/{id}",method = RequestMethod.GET)
-    @TakeLog
-    public User findById(@PathVariable  Integer id){
+    @RequestMapping(value = "/{id}",method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public UserDto findById(@PathVariable  Integer id){
         System.out.println("正在查询用户。。。");
-        return userService.findById(id);
+        UserDto userDto = Optional.ofNullable(userServiceImpl.findById(id))
+                .map( userPo -> {
+                    UserDto user = new UserDto();
+                    user.setUserId(userPo.getId());
+                    user.setUserName(userPo.getUsername());
+                    user.setBalance(userPo.getBalance());
+                    user.setPassword(userPo.getPassword());
+                    user.setSex(userPo.getSex());
+                    user.setUserType("1");
+                    user.setCreateDt(userPo.getCreatedt());
+                    user.setUpdateDt(userPo.getUpdatedt());
+                    return user;
+                }).orElse(new UserDto());
+
+        return userDto;
     }
 
     @RequestMapping(value="/{id}",method = RequestMethod.DELETE)
     public String deleteById(@PathVariable  Integer id){
-        userService.delete(id);
+        userServiceImpl.delete(id);
         return "删除成功";
     }
 
@@ -207,7 +232,7 @@ public class UserController {
     @GetMapping("/rabbitmq/dlkSend")
     public Result dlkSend(@RequestParam String message, Integer delay){
         UserDto userDto = new UserDto();
-        userDto.setId(0);
+        userDto.setUserId(0);
         userDto.setUserName(message);
         userDto.setUserType("1");
 
@@ -235,5 +260,22 @@ public class UserController {
                 ResponseEnum.SUUCESS.getReponseCode(),
                 ResponseEnum.SUUCESS.getReponseMessage(),
                 "使用ApplicatonContext发送Event消息成功");
+    }
+
+    @RequestMapping(method = RequestMethod.PUT)
+    Result updateBalance(@RequestBody UserDto userDto){
+        System.out.println("用户服务Controller开始执行余额扣除。。。");
+        Integer userId = userDto.getUserId();
+
+        UserPo user = userServiceImpl.findById(userId);
+
+        UpdateWrapper<UserPo> userUpdateWrapper = new UpdateWrapper<>();
+
+        user.setBalance(user.getBalance()-userDto.getBalance());
+        userUpdateWrapper.eq("id", userId);
+
+        userServiceImpl.update(user,userUpdateWrapper);
+
+        return Result.success("成功更新账户余额");
     }
 }

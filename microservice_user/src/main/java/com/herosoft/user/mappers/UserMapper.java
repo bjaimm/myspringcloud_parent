@@ -1,18 +1,20 @@
 package com.herosoft.user.mappers;
 
-import com.herosoft.user.pojo.User;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.herosoft.commons.dto.UserDto;
+import com.herosoft.user.po.UserPo;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
 @Mapper
-public interface UserMapper {
+public interface UserMapper extends BaseMapper<UserPo> {
     /**
      * add user
      *
      * @param user user information
      */
-    void add(User user);
+    void add(UserPo user);
 
     /**
      * update user information
@@ -20,7 +22,7 @@ public interface UserMapper {
      * @param user new user information
      * @return int
      */
-    int update(User user);
+    int updateBySql(UserPo user);
 
     /**
      * delete user by id
@@ -35,12 +37,16 @@ public interface UserMapper {
      * @param id user id
      * @return User
      */
-    User load(Integer id);
+    UserPo load(Integer id);
 
     /**
      * find all users
      *
      * @return List<User>
      */
-    List<User> findAll();
+    List<UserPo> findAll();
+
+    List<UserPo> findUsersSelective(UserDto userCriteria);
+
+    void saveBatchBySql(List<UserPo> userList);
 }

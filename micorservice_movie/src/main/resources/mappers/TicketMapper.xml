@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.herosoft.movie.dao.TicketMapper">
 
-    <resultMap id="Ticket" type="com.herosoft.movie.model.Ticket" >
+    <resultMap id="Ticket" type="com.herosoft.movie.po.TicketPo" >
         <result column="id" property="id" />
         <result column="moviename" property="moviename" />
         <result column="number" property="number" />
@@ -15,8 +15,8 @@
 		t.number
     </sql>
 
-    <insert id="add" parameterType="com.herosoft.movie.model.Ticket" useGeneratedKeys="true" keyProperty="id" >
-        INSERT INTO ticket (
+    <insert id="add" parameterType="com.herosoft.movie.po.TicketPo" useGeneratedKeys="true" keyProperty="id" >
+        INSERT INTO ticketPo (
             `moviename`,
             `number`
         ) VALUES (
@@ -25,21 +25,21 @@
                  );
     </insert>
 
-    <update id="update" parameterType="com.herosoft.movie.model.Ticket" >
-        UPDATE ticket
+    <update id="update" parameterType="com.herosoft.movie.po.TicketPo" >
+        UPDATE ticketPo
         SET
             `moviename` = #{moviename},
             `number` = #{number}
         WHERE id = #{id} and number > 0
     </update>
     <delete id="delete" parameterType="java.lang.Integer" >
-        DELETE FROM ticket
+        DELETE FROM ticketPo
         WHERE id = #{id}
     </delete>
 
     <select id="load" parameterType="java.lang.Integer" resultMap="Ticket">
         SELECT <include refid="Base_Column_List" />
-        FROM ticket AS t
+        FROM ticketPo AS t
         WHERE t.id = #{id}
     </select>
 

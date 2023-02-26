@@ -27,10 +27,17 @@
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
+        <!--如果引入MybatisPlus依赖，则需要去除Mybatis依赖，以使MybatisPlus配置生效-->
+        <!--<dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>1.3.3</version>
+        </dependency>-->
+        <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.5.3</version>
         </dependency>
 
         <dependency>
@@ -105,7 +112,22 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/cn.hutool/hutool-all -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.herosoft</groupId>
+            <artifactId>microservice_commons</artifactId>
+            <version>0.1</version>
+        </dependency>
+        <!--spring-cloud-starter-zippkin已包含Sleuth依赖-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-zipkin</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <finalName>microservice-user</finalName>

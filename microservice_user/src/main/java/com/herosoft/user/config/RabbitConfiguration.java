@@ -35,6 +35,11 @@ public class RabbitConfiguration {
 
     public static String DEMO_QUEUE;
 
+    public final static String PAY_ORDER_QUEUE="payOrderForUserService";
+
+    public static String USER_EXCHANGE;
+
+    public static String USER_ROUTEKEY;
     /**
      * 对于静态变量，@value需要加在set方法，且方法不能用static修饰符
      *
@@ -51,21 +56,16 @@ public class RabbitConfiguration {
 
     public final static String DELAYPLUGIN_QUEUE="delayPluginQueue";
 
-    @Bean
-    public ConnectionFactory connectionFactory(@Value("${spring.rabbitmq.host}") String host,
-                                               @Value("${spring.rabbitmq.port}")String port,
-                                               @Value("${spring.rabbitmq.username}")String username,
-                                               @Value("${spring.rabbitmq.password}")String password){
-        CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-
-        connectionFactory.setHost(host);
-        connectionFactory.setPort(Integer.parseInt(port));
-        connectionFactory.setUsername(username);
-        connectionFactory.setPassword(password);
-
-        return connectionFactory.getRabbitConnectionFactory();
-
+    @Value("${user.exchange}")
+    public  void setUserExchange(String userExchange) {
+        USER_EXCHANGE = userExchange;
     }
+
+    @Value("${balance.reduce.for.pay.order.routekey}")
+    public  void setUserRoutekey(String userRoutekey) {
+        USER_ROUTEKEY = userRoutekey;
+    }
+
     @Bean
     public DirectExchange dlkExchange(){
         return new DirectExchange(DLK_EXCHANGE,true,false);

@@ -1,52 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.herosoft.product.dao.ProductDao">
+<mapper namespace="com.herosoft.product.mappers.ProductMapper">
 
-    <resultMap id="Product" type="com.herosoft.product.model.Product" >
-        <result column="id" property="id" />
-        <result column="name" property="name" />
-        <result column="price" property="price" />
-        <result column="amount" property="amount" />
-    </resultMap>
-
-    <sql id="Base_Column_List">
-        t.id,
-		t.name,
-		t.price,
-		t.amount
-    </sql>
-
-    <insert id="add" parameterType="com.herosoft.product.model.Product" useGeneratedKeys="true" keyProperty="id" >
-        INSERT INTO product (
-            `name`,
-            `price`,
-            `amount`
-        ) VALUES (
-                     #{name},
-                     #{price},
-                     #{amount}
-                 );
-    </insert>
-
-    <update id="update" parameterType="com.herosoft.product.model.Product" >
-        UPDATE product
-        SET
-            `name` = #{name},
-            `amount` = #{amount},
-            `price` = #{price}
-        WHERE id = #{id}
-    </update>
-
-    <delete id="delete" parameterType="java.lang.Integer" >
-        DELETE FROM product
-        WHERE id = #{id}
-    </delete>
-
-    <select id="load" parameterType="java.lang.Integer" resultMap="Product">
-        SELECT <include refid="Base_Column_List" />
-        FROM product AS t
-        WHERE t.id = #{id}
-    </select>
 
 </mapper>

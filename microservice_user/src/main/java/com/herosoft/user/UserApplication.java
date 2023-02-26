@@ -4,6 +4,7 @@ import com.herosoft.user.proxy.JdkDynamicProxy;
 import com.herosoft.user.proxy.Person;
 import com.herosoft.user.proxy.StudentStaticProxy;
 import com.herosoft.user.proxy.Student;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
@@ -23,7 +24,7 @@ public class UserApplication {
     public static void main(String[] args) {
 
         SpringApplication.run(UserApplication.class,args);
-
+        System.out.println("UserApplicaiton main方法开始执行。。。");
         //创建被代理对象
         Person student = new Student("张三");
         //创建动态代理
@@ -44,6 +45,7 @@ public class UserApplication {
         studentStaticProxy.wakeup();
         studentStaticProxy.sleep();
         studentStaticProxy.eat("苹果");
+
 
 /*
         List<String> topics = new ArrayList<>();

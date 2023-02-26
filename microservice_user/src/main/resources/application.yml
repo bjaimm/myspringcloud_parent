@@ -3,6 +3,11 @@ server:
 spring:
   application:
     name: microservice-user
+  zipkin:
+    base-url: http://localhost:9411/
+    sleuth:
+      sampler:
+        probability: 1
   jpa:
     database: mysql
     generate-ddl: true
@@ -12,7 +17,7 @@ spring:
     port: 6379
     database: 0
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/herosoft?characterEncoding=UTF-8
     username: root
     password: 123456
@@ -21,6 +26,9 @@ spring:
     port: 5672
     username: guest
     password: guest
+    listener:
+      simple:
+        acknowledge-mode: manual
   kafka:
     properties:
       request.timeout.ms: 180000
@@ -49,12 +57,19 @@ eureka:
     register-with-eureka: true
   instance:
     prefer-ip-address: true
-mybatis:
+mybatis-plus:
   mapper-locations: classpath:mappers/**/*.xml
+logging:
+  level:
+    com:
+      herosoft:
+        user:
+          mappers: debug
 token:
   secret: changedagain!!!!!!!okokok
 network:
   kafka:
     ip: kafka
     port: 9092
+
 

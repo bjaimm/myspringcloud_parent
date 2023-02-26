@@ -1,15 +1,15 @@
 package com.herosoft.movie.dao;
 
-import com.herosoft.movie.model.Ticket;
+import com.herosoft.movie.po.TicketPo;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface TicketMapper {
-    void add(Ticket ticket);
+    void add(TicketPo ticketPo);
 
-    int update(Ticket ticket);
+    int update(TicketPo ticketPo);
 
     void delete(Integer id);
 
-    Ticket load(Integer id);
+    TicketPo load(Integer id);
 }

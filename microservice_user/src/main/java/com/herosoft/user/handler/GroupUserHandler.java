@@ -1,7 +1,7 @@
 package com.herosoft.user.handler;
 
+import com.herosoft.commons.dto.UserDto;
 import com.herosoft.user.annotations.HandlerType;
-import com.herosoft.user.dto.UserDto;
 import org.springframework.stereotype.Component;
 
 @Component
