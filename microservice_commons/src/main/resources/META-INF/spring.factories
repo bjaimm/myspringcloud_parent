@@ -1,0 +1,4 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.herosoft.commons.response.ControllerResponseAdvise,\
+com.herosoft.commons.aops.TakeLogAspect,\
+com.herosoft.commons.handlers.MyBatisPlusMetaObjectHandler
