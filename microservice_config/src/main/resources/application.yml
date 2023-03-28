@@ -1,5 +1,5 @@
 server:
-  port: 6666
+  port: 8001
 spring:
   application:
     name: microservice-config
@@ -11,11 +11,19 @@ spring:
           username: bjaimm
           password: herosoft123456
           default-label: master
+  zipkin:
+    base-url: http://localhost:9411/
+    sleuth:
+      sampler:
+        probability: 1
   rabbitmq:
     host: localhost
     port: 5672
     username: guest
     password: guest
+    listener:
+      simple:
+        acknowledge-mode: manual
 eureka:
   client:
     service-url:
