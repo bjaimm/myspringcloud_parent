@@ -14,4 +14,9 @@ public interface UserService {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     Result findById(@PathVariable Integer id);
+
+    @RequestMapping(value = "/users/username/{userName}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    Result findByUserName(@PathVariable String userName);
 }

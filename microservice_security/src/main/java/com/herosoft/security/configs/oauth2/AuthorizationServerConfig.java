@@ -1,5 +1,7 @@
 package com.herosoft.security.configs.oauth2;
 
+import com.herosoft.security.dto.SecurityUserDetails;
+import com.herosoft.security.service.SecurityUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,6 +45,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    @Autowired
+    private SecurityUserDetailService securityUserDetailService;
+
     /**
      * 令牌访问端点配置
      *
@@ -55,6 +60,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .authorizationCodeServices(authorizationCodeServices())
                 .authenticationManager(authenticationManager)
                 .tokenServices(tokenServices())
+                .userDetailsService(securityUserDetailService)
                 .allowedTokenEndpointRequestMethods(HttpMethod.POST,HttpMethod.GET)
                 .pathMapping("/oauth/token","/security/oauth/token")
                 .pathMapping("/oauth/check_token","/security/oauth/check_token")

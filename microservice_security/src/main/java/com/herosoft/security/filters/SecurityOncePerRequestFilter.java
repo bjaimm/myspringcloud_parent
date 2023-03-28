@@ -36,7 +36,7 @@ public class SecurityOncePerRequestFilter extends OncePerRequestFilter {
         //从请求header中取出token，如果token不存在，直接放行，由Spring Security框架其他过滤器处理
         String token =request.getHeader("token");
         if(token == null){
-            log.info("request中没有获取到token,将由后续security过滤器处理。。。");
+            log.info("请求头中token字段没有获取到数据,将由后续security过滤器处理。。。");
             filterChain.doFilter(request, reponse);
             return;
         }

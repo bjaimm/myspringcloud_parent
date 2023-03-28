@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.herosoft.commons.annotations.NotControllerResponseAdvice;
 import com.herosoft.commons.results.Result;
 import com.herosoft.security.configs.system.SysParamsConfig;
+import com.herosoft.security.dto.GetTokenDto;
 import com.herosoft.security.dto.LoginUserDto;
 import com.herosoft.security.po.UrlListPo;
 import com.herosoft.security.service.RolePermissionService;
@@ -11,11 +12,18 @@ import com.herosoft.security.service.SecurityService;
 import com.herosoft.security.service.UrlListService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.trace.http.HttpTrace;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +44,9 @@ public class SecurityController {
 
     @Autowired
     private UrlListService urlListService;
+
+    @Autowired
+    private TokenEndpoint tokenEndpoint;
 
     @RequestMapping(value = "/status",produces = MediaType.APPLICATION_JSON_VALUE)
     public String checkStatus(){
@@ -116,5 +127,25 @@ public class SecurityController {
         sysParamsConfig.refreshWhiteList(blackList);
 
         return blackList;
+    }
+
+    @RequestMapping(value = "/getToken",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    public OAuth2AccessToken getToken(@RequestBody GetTokenDto getTokenDto) throws HttpRequestMethodNotSupportedException {
+        log.info("收到获取token的request, 请求头包含信息:{}",getTokenDto.toString());
+
+        Map<String, String> parameters = new HashMap<>();
+
+        parameters.put("username",getTokenDto.getUserName());
+        parameters.put("password",getTokenDto.getPassword());
+        parameters.put("client_id",getTokenDto.getClientId());
+        parameters.put("client_secret",getTokenDto.getClientSecret());
+        parameters.put("grant_type",getTokenDto.getGrantType());
+
+        return tokenEndpoint.postAccessToken(
+                new UsernamePasswordAuthenticationToken(getTokenDto.getUserName(),getTokenDto.getPassword()),
+                parameters).getBody();
+
     }
 }

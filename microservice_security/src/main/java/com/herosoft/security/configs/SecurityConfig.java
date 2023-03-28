@@ -75,6 +75,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/security/authority").permitAll()
                 .antMatchers("/security/whitelist").permitAll()
                 .antMatchers("/security/blacklist").permitAll()
+                .antMatchers("/security/getToken").permitAll()
+                .antMatchers("/security/refreshToken").permitAll()
                 .antMatchers("/security/p1/**").hasAuthority("security_p1")
                 .antMatchers("/security/p2/**").hasAuthority("security_p2")
                 .antMatchers("/security/user/**").hasRole("User")

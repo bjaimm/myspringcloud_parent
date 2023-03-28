@@ -12,6 +12,7 @@ import com.herosoft.security.po.RolePo;
 import com.herosoft.security.po.UserRolePo;
 import com.herosoft.security.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -48,15 +49,27 @@ public class SecurityUserDetailServiceImpl implements SecurityUserDetailService 
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         log.info("loadUserByUsername调用参数：{}",s);
 
-        UserDto userDto = JSON.parseObject(JSON.toJSONString(userService.findById(Integer.parseInt(s)).getData()),
-                UserDto.class);
+        UserDto userDto;
+        Integer userId;
+        if (StringUtils.isNumeric(s)) {
+            userId = Integer.parseInt(s);
+            userDto = JSON.parseObject(JSON.toJSONString(userService.findById(userId).getData()),
+                    UserDto.class);
+
+        }
+        else {
+            userDto = JSON.parseObject(JSON.toJSONString(userService.findByUserName(s).getData()),
+                    UserDto.class);
+            userId = userDto.getUserId();
+        }
 
         if (BeanUtil.isEmpty(userDto)) {
             throw new UsernameNotFoundException("用户不存在");
         }
 
+
         List<Integer> roleIds = userRoleService.list(Wrappers.lambdaQuery(UserRolePo.class)
-                .eq(UserRolePo::getUserId,Integer.parseInt(s))).stream()
+                .eq(UserRolePo::getUserId,userId)).stream()
                 .map(
                 userRolePo -> userRolePo.getRoleId()
                 )
