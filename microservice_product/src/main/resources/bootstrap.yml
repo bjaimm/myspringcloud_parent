@@ -1,15 +1,20 @@
+server:
+  port: 8201
 spring:
+  application:
+    name: microservice-product
   cloud:
     config:
-      uri: http://localhost:8301
-      label: master
+      uri: http://localhost:8001
+      label: dev
       profile: dev
       name: microservice-product #配置中心的文件名由name+“-”+profile组成
-    bus:
-      refresh:
-        enabled: true
-management:
-  endpoints:
-    web:
-      exposure:
-        include: bus-refresh
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6868/eureka
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
