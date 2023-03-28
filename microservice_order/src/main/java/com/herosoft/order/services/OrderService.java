@@ -11,4 +11,8 @@ public interface OrderService {
     OrderInfoDto createOrder(OrderRequestDto orderRequestDto);
 
     void generateOrderByExcel(String fileName);
+
+    void cancelOrderWithoutStockChange(int userId, int orderHeaderId);
+
+    void cancelOrderWithStockChange(int userId, int orderHeaderId) throws Exception;
 }

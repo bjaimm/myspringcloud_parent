@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.herosoft.order.mappers.OrderHeaderMapper">
+
+    <resultMap id="orderInfoDto" type="com.herosoft.order.dto.OrderInfoDto">
+
+        <id property="orderHeaderId" column="order_header_id"/>
+        <result property="orderAmount" column="order_amount"/>
+        <result property="orderStatus" column="status"/>
+        <result property="orderStatusMessage" column="order_status_message"/>
+        <collection property="orderDetailList" select="selectPageOrderDetailDto"
+                    column="{orderHeaderId1 =order_header_id}"
+                    ofType="com.herosoft.order.dto.OrderDetailDto">
+
+        </collection>
+    </resultMap>
+    <resultMap id="orderDetailDto" type="com.herosoft.order.dto.OrderDetailDto">
+        <result property="orderDetailId" column="order_detail_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="productQty" column="product_qty"/>
+    </resultMap>
+
+    <select id="findOrderInfoByOrderHeaderId" parameterType="int" resultMap="orderInfoDto">
+        select *,
+            case when status=0 then '已建单'
+                 when status=1 then '库存已扣减'
+                when status=2 then '已支付'
+                 else '未知状态'
+            end as order_status_message
+        from order_header oh
+        where oh.order_header_id = #{orderHeaderId}
+    </select>
+    <select id="selectPageOrderInfo"  resultMap="orderInfoDto">
+        select *,
+            case when status=0 then '已建单'
+                when status=1 then '库存已扣减'
+                when status=2 then '已支付'
+                else '未知状态'
+                end as order_status_message
+        from order_header oh
+    </select>
+    <select id="selectPageOrderDetailDto"  resultMap="orderDetailDto">
+        select *
+        from order_header oh
+        inner join order_detail od on
+        oh.order_header_id = od.order_header_id
+        where oh.order_header_id = #{orderHeaderId1}
+    </select>
+
+</mapper>

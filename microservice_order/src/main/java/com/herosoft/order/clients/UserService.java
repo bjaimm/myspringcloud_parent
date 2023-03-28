@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-@FeignClient(name = "microservice-user")
+@FeignClient(name = "microservice-user",fallbackFactory = UserServiceFallbackFactory.class)
 public interface UserService {
 
     @RequestMapping(method = RequestMethod.PUT,value = "/users")
@@ -16,4 +16,6 @@ public interface UserService {
 
     @RequestMapping(method = RequestMethod.GET,value = "/users/{id}")
     Result findById(@PathVariable Integer id);
+
 }
+

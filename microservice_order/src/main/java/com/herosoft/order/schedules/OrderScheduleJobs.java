@@ -35,7 +35,7 @@ public class OrderScheduleJobs {
     @Value("${server.port}")
     private int port;
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    //@Scheduled(cron = "0/5 * * * * ?")
     public void printProductSummary(){
         List<ProductDto> productDtoList = JSON.parseArray(JSON.toJSONString(productService.findAll().getData()), ProductDto.class);
         AtomicLong paidOrders= new AtomicLong();

@@ -1,7 +1,7 @@
 package com.herosoft.order.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -219,11 +219,15 @@ public class OrderController {
         boolean tryLock;
         //更新创建订单服务调用计数器
         OrderConstants.ORDER_CREATE_REQUESTS_COUNT=OrderConstants.ORDER_CREATE_REQUESTS_COUNT+1;
+        Result userResult = userService.findById(userId);
 
-        String jsonString = JSON.toJSONString(userService.findById(userId).getData());
+        if(!userResult.getSuccess()){
+            return userResult;
+        }
+        String jsonString = JSON.toJSONString(userResult.getData());
         JSONObject jsonObject = JSON.parseObject(jsonString);
 
-        String username = jsonObject.getString("username");
+        String username = jsonObject.getString("userName");
 
         RLock rLock = redissonClient.getLock("CreateOrderLock");
 
@@ -320,5 +324,26 @@ public class OrderController {
     @RequestMapping(method = RequestMethod.GET,value = "/generateOrder")
     public void generateOrderInfoByExcel(@RequestParam String fileName) throws IOException {
         orderServiceImpl.generateOrderByExcel(fileName);
+    }
+    @RequestMapping(method = RequestMethod.PUT, value = "/cancel/{userId}/{orderHeaderId}",produces = "application/json")
+    public String cancelOrder(@PathVariable int userId, @PathVariable int orderHeaderId){
+        OrderHeaderPo orderHeaderPo = orderHeaderService.getById(orderHeaderId);
+        if(orderHeaderPo==null){
+            return "无效订单";
+        }
+        if(OrderStatus.PAID.getOrderStatus()==orderHeaderPo.getStatus()){
+            return "订单已支付，不能取消订单";
+        }
+        if(OrderStatus.CANCEL.getOrderStatus()==orderHeaderPo.getStatus()){
+            return "订单已取消，不能再取消订单";
+        }
+        if(OrderStatus.OPEN.getOrderStatus()==orderHeaderPo.getStatus()){
+            orderServiceImpl.cancelOrderWithoutStockChange(userId,orderHeaderId);
+        }
+        else
+        {
+            orderServiceImpl.cancelOrderWithStockChange(userId,orderHeaderId);
+        }
+        return "成功取消订单";
     }
 }

@@ -14,7 +14,7 @@ spring:
         probability: 1
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/herosoft?characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/microservice_order?characterEncoding=UTF-8
     username: root
     password: 123456
   rabbitmq:
@@ -24,6 +24,28 @@ spring:
     password: guest
     publisher-confirm-type: correlated
     publisher-returns: true
+seata:
+  enabled: true
+  application-id: ${spring.application.name}
+  tx-service-group: ${spring.application.name}-tx-group
+  service:
+    vgroup-mapping:
+      microservice-order-tx-group: seata-server
+  config:
+    type: nacos
+    nacos:
+      namespace: 98bdf680-1fd2-46fc-b5c2-5a69df0e98d9
+      server-addr: localhost:8848
+      group: SEATA_GROUP
+      username: nacos
+      password: nacos
+      dataId: seataServer.properties
+  registry:
+    type: eureka
+    eureka:
+      application: seata-server
+      service-url: http://localhost:6868/eureka
+      weight: 1
 eureka:
   client:
     service-url:
@@ -42,7 +64,27 @@ logging:
       herosoft:
         order:
           mappers: debug
+  config: classpath:logback-spring.xml
 token:
   secret: changedagain!!!!!!!okokok
+feign:
+  hystrix:
+    enabled: true
+#strategy设置为SEMAPHORE是解决XID在Feign调用中有Hystrix熔断处理时不能传递的问题，同时要结合FeignConfig中的逻辑
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeInMilliSeconds: 10000
+          strategy: SEMAPHORE
+
+threadpool:
+  corePoolSize: 5
+  maxPoolSize: 10
+  queueCapacity: 10
+  keepAliveSeconds: 5
+
 
 

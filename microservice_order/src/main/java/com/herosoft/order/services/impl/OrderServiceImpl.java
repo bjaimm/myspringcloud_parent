@@ -1,22 +1,32 @@
 package com.herosoft.order.services.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.herosoft.commons.exceptions.DefinitionException;
+import com.herosoft.commons.results.Result;
 import com.herosoft.order.clients.ProductService;
 import com.herosoft.order.clients.UserService;
+import com.herosoft.order.dto.OrderDetailDto;
 import com.herosoft.order.dto.OrderInfoDto;
 import com.herosoft.order.dto.OrderRequestDto;
 import com.herosoft.order.enums.OrderStatus;
 import com.herosoft.order.po.OrderDetailPo;
 import com.herosoft.order.po.OrderHeaderPo;
 import com.herosoft.order.services.OrderService;
+import io.seata.core.context.RootContext;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cglib.beans.BeanCopier;
+import org.springframework.cglib.core.Converter;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -38,6 +48,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderHeaderServiceImpl orderHeaderService;
+
+    @Autowired
+    @Qualifier("taskExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired
     private OrderDetailServiceImpl orderDetailService;
@@ -170,6 +184,49 @@ public class OrderServiceImpl implements OrderService {
         EasyExcel.write(fileName+".xlsx", OrderInfoDto.class)
                 .sheet("订单模板")
                 .doWrite(getOrderInfo());
+    }
+
+    @Override
+    @Transactional
+    public void cancelOrderWithoutStockChange(int userId, int orderHeaderId) {
+        OrderHeaderPo cancelOrder = orderHeaderService.getById(orderHeaderId);
+
+        cancelOrder.setStatus(OrderStatus.CANCEL.getOrderStatus());
+        cancelOrder.setUpdateBy(userId);
+
+        orderHeaderService.updateById(cancelOrder);
+    }
+
+    @Override
+    @GlobalTransactional
+    public void cancelOrderWithStockChange(int userId, int orderHeaderId) throws RuntimeException {
+        OrderHeaderPo orderHeader = orderHeaderService.getById(orderHeaderId);
+
+        orderHeader.setStatus(OrderStatus.CANCEL.getOrderStatus());
+        orderHeader.setUpdateBy(userId);
+        BeanCopier beanCopier = new BeanCopier() {
+            @Override
+            public void copy(Object o, Object o1, Converter converter) {
+
+            }
+        };
+
+        log.info("线程池核心线程数：{}",taskExecutor.getCorePoolSize());
+
+        //本地更新
+        log.info("开始执行本地更新订单状态事务。。。");
+        orderHeaderService.updateById(orderHeader);
+
+        List<OrderDetailPo> orderDetail = orderDetailService.list(Wrappers.lambdaQuery(OrderDetailPo.class)
+                .eq(OrderDetailPo::getOrderHeaderId,orderHeaderId));
+
+        List<OrderDetailDto> orderDetailDtos = BeanUtil.copyToList(orderDetail,OrderDetailDto.class);
+        //远程库存服务
+        log.info("开始调用远程库存服务进行增加库存事务。。。全局事务XID:{}", RootContext.getXID());
+        Result result = productService.deduceStock(orderDetailDtos);
+
+        log.info("结束调用远程库存服务进行增加库存事务。。。");
+
     }
 
     private List<OrderInfoDto> getOrderInfo() {
