@@ -7,12 +7,14 @@ import com.herosoft.commons.enums.ResponseEnum;
 import com.herosoft.commons.exceptions.DefinitionException;
 import com.herosoft.commons.results.Result;
 import com.herosoft.user.async.AsyncService;
+import com.herosoft.user.dao.UserDao;
 import com.herosoft.user.events.ObservationEvent;
 import com.herosoft.user.po.UserPo;
 import com.herosoft.user.service.RabbitMqSender;
 import com.herosoft.user.service.impl.UserServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -21,6 +23,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -37,6 +42,7 @@ import java.util.stream.Collectors;
 @RefreshScope //设置刷新配置后，不重启微服务
 @RequestMapping(value = "/users")
 @Api(value = "用户管理接口")
+@Slf4j
 public class UserController {
     /**
      * lock retry time
@@ -44,6 +50,9 @@ public class UserController {
     private final static Integer LOCK_RETRY_TIME=5;
     @Autowired
     private UserServiceImpl userServiceImpl;
+
+    @Autowired
+    private UserDao userDaoImpl1;
 
     @Autowired
     private KafkaTemplate kafkaTemplate;
@@ -184,8 +193,29 @@ public class UserController {
     @RequestMapping(value = "/{id}",method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public UserDto findById(@PathVariable  Integer id){
-        System.out.println("正在查询用户。。。");
+        System.out.println("正在按userid查询用户。。。");
         UserDto userDto = Optional.ofNullable(userServiceImpl.findById(id))
+                .map( userPo -> {
+                    UserDto user = new UserDto();
+                    user.setUserId(userPo.getId());
+                    user.setUserName(userPo.getUsername());
+                    user.setBalance(userPo.getBalance());
+                    user.setPassword(userPo.getPassword());
+                    user.setSex(userPo.getSex());
+                    user.setUserType("1");
+                    user.setCreateDt(userPo.getCreatedt());
+                    user.setUpdateDt(userPo.getUpdatedt());
+                    return user;
+                }).orElse(new UserDto());
+
+        return userDto;
+    }
+
+    @RequestMapping(value = "/username/{userName}",method = RequestMethod.GET,
+    produces = MediaType.APPLICATION_JSON_VALUE)
+    public UserDto findByUserName(@PathVariable  String userName){
+        System.out.println("正在按username查询用户。。。");
+        UserDto userDto = Optional.ofNullable(userServiceImpl.findByUserName(userName))
                 .map( userPo -> {
                     UserDto user = new UserDto();
                     user.setUserId(userPo.getId());
@@ -278,4 +308,35 @@ public class UserController {
 
         return Result.success("成功更新账户余额");
     }
+    @RequestMapping(value ="/retry" ,method = RequestMethod.GET)
+    public void retry(){
+
+        //由于是基于AOP实现，不支持类里自调用方法，所以recoverMethod的调用要通过applicationContext取到实例对象的方式调用
+        UserController userController = applicationContext.getBean(UserController.class);
+
+        userController.retryMethod();
+    }
+
+    @Retryable(maxAttempts = 4,backoff = @Backoff(delay = 2000L,multiplier = 1.5))
+    public void retryMethod() {
+        try {
+            log.info("开始调用重试方法。。。");
+            int i = 1/0;
+        }
+        catch (Exception e){
+            throw e;
+        }
+    }
+
+    /**
+     * recover方法必须和recoverMethod方法在同一个类，作为所有重试次数后依然失败时，
+     * 执行的一个方法
+     *
+     * @param e
+     */
+    @Recover
+    public void recover(Exception e){
+        log.info("重试次数用完，触发recover方法。。。exception:"+e.getLocalizedMessage());
+    }
+
 }

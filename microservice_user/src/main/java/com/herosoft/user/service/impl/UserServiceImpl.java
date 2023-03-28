@@ -1,6 +1,8 @@
 package com.herosoft.user.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.herosoft.commons.dto.UserDto;
 import com.herosoft.user.handler.AbstractHandler;
@@ -113,6 +115,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserPo>
 
         return userMapper.update(userPoUpdate,userUpdateWrapper);
 
+    }
+
+    @Override
+    public UserPo findByUserName(String userName) {
+        return userMapper.selectOne(Wrappers.lambdaQuery(UserPo.class)
+                .eq(UserPo::getUsername,userName));
     }
 
 }

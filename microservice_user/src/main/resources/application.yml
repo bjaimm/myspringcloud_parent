@@ -18,9 +18,17 @@ spring:
     database: 0
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/herosoft?characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/microservice_user?characterEncoding=UTF-8
     username: root
     password: 123456
+  data:
+    mongodb:
+      authentication-database: admin
+      host: 127.0.0.1
+      port: 27017
+      username: hw
+      password: '123456'
+      database: student
   rabbitmq:
     host: localhost
     port: 5672
@@ -65,11 +73,10 @@ logging:
       herosoft:
         user:
           mappers: debug
+  config: classpath:logback-spring.xml
 token:
-  secret: changedagain!!!!!!!okokok
+  secret: changedfromconfigserver!!
 network:
   kafka:
     ip: kafka
     port: 9092
-
-

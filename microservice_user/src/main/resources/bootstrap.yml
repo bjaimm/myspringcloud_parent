@@ -1,0 +1,21 @@
+#使用spring cloud config作为配置中心，需要将spring.cloud.config和eureka以及application name的配置放在bootstrap.yml中
+server:
+  port: 8101
+spring:
+  application:
+    name: microservice-users
+  cloud:
+    config:
+      uri: http://localhost:8001
+      label: dev
+      profile: dev
+      name: microservice-users #配置中心的文件名由name+“-”+profile组成
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6868/eureka
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
