@@ -1,4 +1,4 @@
-node('test-agent') {
+node() {
     def sonar_home = tool name: 'sonarqube-scanner'
     stages {
         stage('拉取代码') {
