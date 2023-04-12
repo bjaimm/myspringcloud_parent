@@ -1,5 +1,6 @@
-node() {
-    def sonar_home = tool name: 'sonarqube-scanner'
+pipeline {
+    agent any
+    //sonar_home = tool name: 'sonarqube-scanner'
     stages {
         stage('拉取代码') {
             sh "echo $PATH"
