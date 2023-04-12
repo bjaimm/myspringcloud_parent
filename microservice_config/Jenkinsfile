@@ -1,11 +1,10 @@
-pipeline {
-    agent any
+node {
     //sonar_home = tool name: 'sonarqube-scanner'
-    stages {
-        stage('拉取代码') {
-            steps{
-                checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'f2f81612-da80-4372-9d5f-f19bb42c442b', url: 'https://github.com/bjaimm/myspringcloud_parent.git']])
-            }
-        }
+
+    stage('拉取代码') {
+
+        checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'f2f81612-da80-4372-9d5f-f19bb42c442b', url: 'https://github.com/bjaimm/myspringcloud_parent.git']])
+
     }
+
 }
