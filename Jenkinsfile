@@ -10,8 +10,8 @@ node() {
     stage("Sonar Scan"){
 
         def scannerHome = tool 'sonarqube-scanner'
-        steps{
-            echo ${scannerHome}
+        echo{
+            ${scannerHome}
         }
         withSonarQubeEnv('sonarqube-server'){
             bat """
