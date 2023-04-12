@@ -11,10 +11,10 @@ node {
 
         def scannerHome = tool 'sonarqube-scanner'
         withSonarQubeEnv('sonarqube-server'){
-            sh """
+            sh '''
                 cd ${ServiceName}
                 ${scannerHome}/bin/sonar-scanner
-            """
+            '''
         }
     }
 
