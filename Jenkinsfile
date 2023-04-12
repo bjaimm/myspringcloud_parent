@@ -1,4 +1,4 @@
-node {
+node('windows') {
     //sonar_home = tool name: 'sonarqube-scanner'
 
     stage('Pull Code') {
@@ -11,7 +11,7 @@ node {
 
         def scannerHome = tool 'sonarqube-scanner'
         withSonarQubeEnv('sonarqube-server'){
-            sh """
+            bat """
             cd ${ServiceName}
             ${scannerHome}/bin/sonar-scanner
             """
