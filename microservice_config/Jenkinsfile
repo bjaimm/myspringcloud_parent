@@ -4,7 +4,6 @@ pipeline {
     stages {
         stage('拉取代码') {
             steps{
-                sh "echo $PATH"
                 checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'f2f81612-da80-4372-9d5f-f19bb42c442b', url: 'https://github.com/bjaimm/myspringcloud_parent.git']])
             }
         }
