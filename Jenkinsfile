@@ -1,4 +1,4 @@
-node('windows') {
+node() {
     //sonar_home = tool name: 'sonarqube-scanner'
 
     stage('Pull Code') {
