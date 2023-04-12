@@ -10,7 +10,7 @@ node {
     stage("Sonar Scan"){
 
         def scannerHome = tool 'sonarqube-scanner'
-        withSonarQubeEnv('sonarqube-server'){
+        withSonarQubeEnv(credentialsId: 'a6357d77-cb64-4aef-9665-16a0b2608739'){
             sh '''
                 cd ${ServiceName}
                 ${scannerHome}/bin/sonar-scanner
