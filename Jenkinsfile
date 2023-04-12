@@ -11,8 +11,10 @@ node {
 
         def scannerHome = tool 'sonarqube-scanner'
         withSonarQubeEnv(credentialsId: 'a6357d77-cb64-4aef-9665-16a0b2608739'){
-            shell "cd ${ServiceName}"
-            //${scannerHome}/bin/sonar-scanner
+            shell """
+            cd ${ServiceName}
+            ${scannerHome}/bin/sonar-scanner
+            """
         }
     }
 
