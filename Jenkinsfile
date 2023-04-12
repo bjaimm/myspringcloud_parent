@@ -7,10 +7,15 @@ node {
 
     }
 
-    stage("代码审查"){
+    stage("Sonar Scan"){
 
         def scannerHome = tool 'sonarqube-scanner'
-
+        withSonarQubeEnv('sonarqube-server'){
+            sh """
+                cd ${ServiceName}
+                ${scannerHome}/bin/sonar-scanner
+            """
+        }
     }
 
 }
