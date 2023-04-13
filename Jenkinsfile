@@ -6,7 +6,7 @@ repositoryUrl=""
 projectName="microservice-demo"
 //Windows节点下这个变量中俄路径隔离符会被去除
 //scannerHome = tool name: 'sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
+//scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
 
 pipeline {
     agent any
@@ -24,6 +24,10 @@ pipeline {
             }
 
             steps{
+                script {
+                     // 配置sonar scanner的名称
+                     scannerHome = tool 'SonarQube-Scanner'
+                }
 
                 withSonarQubeEnv('sonarqube-server'){
 
