@@ -49,10 +49,9 @@ pipeline {
                  maven "Maven3.8.6"
             }
             steps{
-                sh "cd ${ServiceName}"
 
                 //Compile,Package,Build image
-                sh "mvn clean package -DskipTests=true dockerfile:build"
+                sh "mvn -f ${ServiceName} clean package -DskipTests=true dockerfile:build"
 
                 //Tag image
                 sh "docker tag ${imageName} ${repositoryUrl}/${projectName}/${imageName}"
