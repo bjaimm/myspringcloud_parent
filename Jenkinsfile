@@ -19,6 +19,7 @@ node() {
         def scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
 
         withSonarQubeEnv('sonarqube-server'){
+            def jdk17 = tool 'jdk17'
             sh "cd ${ServiceName}"
             sh "echo ${scannerHome}"
             sh "${scannerHome}/bin/sonar-scanner"
