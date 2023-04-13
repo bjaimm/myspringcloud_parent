@@ -40,7 +40,7 @@ pipeline {
                 maven "Maven3.8.6"
             }
             steps{
-                sh "mvn -f microservice_commons clean intall -DskipTests=true"
+                sh "mvn -f microservice_commons clean install -DskipTests=true"
             }
         }
         stage("Compile,Package Microservice and Build Push Docker Image"){
