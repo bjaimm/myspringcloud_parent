@@ -28,7 +28,6 @@ pipeline {
                 withSonarQubeEnv('sonarqube-server'){
 
                     sh "cd ${ServiceName}"
-                    sh "echo ${scannerHome}"
                     sh "${scannerHome}/bin/sonar-scanner"
                 }
              }
