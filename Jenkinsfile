@@ -16,7 +16,13 @@ node() {
     stage("Sonar Scan"){
 
         def scannerHome = tool 'sonarqube-scanner'
-        sh "mkdir test"
+
+        withSonarQubeEnv('sonarqube-server'){
+            sh """
+            cd ${ServiceName}
+            ${scannerHome}/bin/sonar-scanner
+            """
+        }
 
     }
     stage("Common Modules Installation"){
