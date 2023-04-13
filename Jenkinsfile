@@ -26,7 +26,7 @@ pipeline {
             steps{
                 script {
                      // 配置sonar scanner的名称
-                     scannerHome = tool 'SonarQube-Scanner'
+                     scannerHome = tool 'sonarqube-scanner'
                 }
 
                 withSonarQubeEnv('sonarqube-server'){
