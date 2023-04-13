@@ -20,7 +20,8 @@ node() {
         withSonarQubeEnv('sonarqube-server'){
             sh '''
             cd ${ServiceName}
-            "${scannerHome}"/bin/sonar-scanner
+            echo ${scannerHome}
+            ${scannerHome}/bin/sonar-scanner
             '''
         }
 
