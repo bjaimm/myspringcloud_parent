@@ -58,8 +58,11 @@ pipeline {
                 sh "docker tag ${imageName} ${projectName}/${imageName}"
 
                 //Push image
-                sh "docker login -u bjaimm -p herosoft123456"
-                sh "docker push ${projectName}/${imageName}"
+                withCredentials([usernamePassword(credentialsId: 'f2f81612-da80-4372-9d5f-f19bb42c442b', passwordVariable: 'password', usernameVariable: 'username')]) {
+                    sh "docker login -u ${username} -p ${password}"
+                    sh "docker push ${projectName}/${imageName}"
+                }
+
             }
         }
     }
