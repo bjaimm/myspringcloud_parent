@@ -5,8 +5,8 @@ imageName = "${ServiceName}:${tag}"
 repositoryUrl=""
 projectName="microservice-demo"
 //Windows节点下这个变量中俄路径隔离符会被去除
-scannerHome = tool name: 'sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-//scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
+//scannerHome = tool name: 'sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
 
 pipeline {
     agent any
@@ -19,6 +19,9 @@ pipeline {
         }
 
         stage("Sonar Scan"){
+            tools {
+                jdk "jdk17"
+            }
 
             steps{
 
