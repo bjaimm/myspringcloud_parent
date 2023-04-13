@@ -58,6 +58,8 @@ pipeline {
                 sh "docker tag ${imageName} ${projectName}/${imageName}"
 
                 //Push image
+                sh "docker login -u bjaimm -p herosoft123456"
+                sh "docker push ${projectName}/${imageName}"
             }
         }
     }
