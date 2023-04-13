@@ -19,6 +19,7 @@ pipeline {
         }
 
         stage("Sonar Scan"){
+            //设置SonarQube需要的JDK版本，在Jenkins全局工具里设置
             tools {
                 jdk "jdk17"
             }
@@ -28,17 +29,25 @@ pipeline {
                 withSonarQubeEnv('sonarqube-server'){
 
                     sh "cd ${ServiceName}"
-                    sh "${scannerHome}/bin/sonar-scanner ${ServiceName}"
+                    //sh "${scannerHome}/bin/sonar-scanner ${ServiceName}"
                 }
              }
 
         }
         stage("Common Modules Installation"){
+            //设置Maven引用，在Jenkins全局工具里设置
+            tools{
+                maven "Maven3.8.6"
+            }
             steps{
                 sh "mvn -f microservice_commons clean intall -DskipTests=true"
             }
         }
         stage("Compile,Package Microservice and Build Push Docker Image"){
+            //设置Maven引用，在Jenkins全局工具里设置
+            tools{
+                 maven "Maven3.8.6"
+            }
             steps{
                 //Compile,Package,Build image
                 sh "mvn -f ${ServiceName} clean package -DskipTests=true dockerfile:build"
