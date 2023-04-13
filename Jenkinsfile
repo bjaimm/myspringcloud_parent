@@ -16,10 +16,11 @@ pipeline {
         }
 
         stage("Sonar Scan"){
+            //Windows节点下这个变量中俄路径隔离符会被去除
+            //scannerHome = tool 'sonarqube-scanner'
+            scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
+
             steps{
-                //Windows节点下这个变量中俄路径隔离符会被去除
-                //scannerHome = tool 'sonarqube-scanner'
-                scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
 
                 withSonarQubeEnv('sonarqube-server'){
 
