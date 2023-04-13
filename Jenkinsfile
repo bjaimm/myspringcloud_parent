@@ -10,7 +10,7 @@ node() {
     stage("Sonar Scan"){
 
         def scannerHome = tool 'sonarqube-scanner'
-        echo{
+        /*echo{
             ${scannerHome}
         }
         withSonarQubeEnv('sonarqube-server'){
@@ -18,7 +18,10 @@ node() {
             cd ${ServiceName}
             ${scannerHome}/bin/sonar-scanner
             """
-        }
+        }*/
+    }
+    stage("Common Modules Installation"){
+        sh "mvn -f microservice_commons clean intall -DskipTests=true"
     }
 
 }
