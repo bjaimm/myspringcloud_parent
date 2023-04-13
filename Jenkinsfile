@@ -18,11 +18,9 @@ node() {
         def scannerHome = tool 'sonarqube-scanner'
 
         withSonarQubeEnv('sonarqube-server'){
-            sh '''
-            cd ${ServiceName}
-            echo ${scannerHome}
-            ${scannerHome}/bin/sonar-scanner
-            '''
+            sh "cd ${ServiceName}"
+            sh "echo ${scannerHome}"
+            sh "${scannerHome}/bin/sonar-scanner"
         }
 
     }
