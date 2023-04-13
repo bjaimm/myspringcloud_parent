@@ -4,6 +4,7 @@ imageName = "${ServiceName}:${tag}"
 //如果是dockerhub,则不需要设置repository
 repositoryUrl=""
 projectName="microservice-demo"
+scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
 
 pipeline {
     agent any
@@ -18,7 +19,6 @@ pipeline {
         stage("Sonar Scan"){
             //Windows节点下这个变量中俄路径隔离符会被去除
             //scannerHome = tool 'sonarqube-scanner'
-            scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
 
             steps{
 
