@@ -2,8 +2,8 @@ tag ="latest"
 imageName = "${ServiceName}:${tag}"
 //如果是本地私有镜像仓库，如Harbor，需要设置repositoryUrl和projectName
 //如果是dockerhub,则不需要设置repository
-repositoryUrl=""
-projectName="bjaimm"
+repositoryUrl="9.197.4.240:85"
+projectName="microservice-demo"
 //Windows节点下这个变量中俄路径隔离符会被去除
 //scannerHome = tool name: 'sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
 scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
@@ -58,12 +58,11 @@ pipeline {
                 sh "mvn -f ${ServiceName} clean package dockerfile:build -DskipTests=true"
 
                 //Tag image
-                //sh "docker tag ${imageName} ${repositoryUrl}/${projectName}/${imageName}"
-                sh "docker tag ${imageName} ${projectName}/${imageName}"
+                sh "docker tag ${imageName} ${repositoryUrl}/${projectName}/${imageName}"
 
                 //Push image
-                withCredentials([usernamePassword(credentialsId: 'f2f81612-da80-4372-9d5f-f19bb42c442b', passwordVariable: 'password', usernameVariable: 'username')]) {
-                    sh "docker login -u ${username} -p ${password}"
+                withCredentials([usernamePassword(credentialsId: 'de607c77-1073-4e39-bbcc-73fdab617162', passwordVariable: 'password', usernameVariable: 'username')]) {
+                    sh "docker login -u ${username} -p ${password} ${repositoryUrl}"
                     sh "docker push ${projectName}/${imageName}"
                 }
 
