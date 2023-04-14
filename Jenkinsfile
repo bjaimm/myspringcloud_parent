@@ -1,12 +1,19 @@
+//设置镜像版本
 tag ="latest"
+
+//设置镜像名
 imageName = "${ServiceName}:${tag}"
+
 //如果是本地私有镜像仓库，如Harbor，需要设置repositoryUrl和projectName
 //如果是dockerhub,则不需要设置repository
 repositoryUrl="9.197.4.240:85"
 projectName="microservice-demo"
+
 //Windows节点下这个变量中俄路径隔离符会被去除
 //scannerHome = tool name: 'sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
 scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
+
+//设置SSH远程部署脚本命令行
 jenkins_shell= "/opt/jenkins_shell/deploy.sh ${ServiceName} ${repositoryUrl} ${projectName} ${tag} ${port}"
 
 pipeline {
