@@ -1,4 +1,6 @@
 FROM openjdk:8-jdk-alpine
-COPY target/microservice_gateway-1.0-SNAPSHOT.jar /work/project/microservice_gateway.jar
+ARG JAR_FILE
+COPY ${JAR_FILE} /work/project/microservice_gateway.jar
 WORKDIR /work/project
+EXPOSE 8888
 CMD ["java", "-jar", "microservice_gateway.jar"]
