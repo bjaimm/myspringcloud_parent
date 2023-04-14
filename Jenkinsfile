@@ -1,5 +1,3 @@
-import com.sun.jmx.snmp.ServiceName
-
 tag ="latest"
 imageName = "${ServiceName}:${tag}"
 //如果是本地私有镜像仓库，如Harbor，需要设置repositoryUrl和projectName
