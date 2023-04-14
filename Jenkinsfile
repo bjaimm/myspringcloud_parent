@@ -25,11 +25,12 @@ pipeline {
             }
 
             steps{
+                dir("${ServiceName}"){
+                    withSonarQubeEnv('sonarqube-server'){
 
-                withSonarQubeEnv('sonarqube-server'){
-
-                    sh "cd ${ServiceName}"
-                    sh "${scannerHome}/bin/sonar-scanner ${ServiceName}"
+                        //sh "cd ${ServiceName}"
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
                 }
              }
 
