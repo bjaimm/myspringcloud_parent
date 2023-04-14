@@ -9,6 +9,7 @@ projectName="microservice-demo"
 //Windows节点下这个变量中俄路径隔离符会被去除
 //scannerHome = tool name: 'sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
 scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
+jenkins_shell= "/opt/jenkins_shell/deploy.sh ${ServiceName} ${repositoryUrl} ${projectName} ${tag} ${port}"
 
 pipeline {
     agent any
@@ -71,7 +72,7 @@ pipeline {
             }
         }
         stage("Deploy Application Remotely"){
-            sshPublisher(publishers: [sshPublisherDesc(configName: 'publish_server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "/opt/jenkins_shell/deploy.sh ${ServiceName} ${repositoryUrl} ${projectName} ${tag} ${port}", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+            sshPublisher(publishers: [sshPublisherDesc(configName: 'publish_server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "${jenkins_shell}", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
         }
     }
 
