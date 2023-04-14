@@ -14,7 +14,7 @@ projectName="microservice-demo"
 scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
 
 //设置SSH远程部署脚本命令行
-jenkins_shell= "/opt/jenkins_shell/deploy.sh $ServiceName $repositoryUrl $projectName $tag $port"
+jenkins_shell= "/opt/jenkins_shell/deploy.sh $ServiceName $repositoryUrl $projectName $tag"
 
 pipeline {
     agent any
