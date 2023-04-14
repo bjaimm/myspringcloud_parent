@@ -1,3 +1,5 @@
+import com.sun.jmx.snmp.ServiceName
+
 tag ="latest"
 imageName = "${ServiceName}:${tag}"
 //如果是本地私有镜像仓库，如Harbor，需要设置repositoryUrl和projectName
@@ -63,10 +65,13 @@ pipeline {
                 //Push image
                 withCredentials([usernamePassword(credentialsId: 'de607c77-1073-4e39-bbcc-73fdab617162', passwordVariable: 'password', usernameVariable: 'username')]) {
                     sh "docker login -u ${username} -p ${password} ${repositoryUrl}"
-                    sh "docker push ${projectName}/${imageName}"
+                    sh "docker push ${repositoryUrl}/${projectName}/${imageName}"
                 }
 
             }
+        }
+        stage("Deploy Application Remotely"){
+            sshPublisher(publishers: [sshPublisherDesc(configName: 'publish_server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "/opt/jenkins_shell/deploy.sh $ServiceName $repositoryUrl $projectName $tag $port", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
         }
     }
 
