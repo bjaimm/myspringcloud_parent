@@ -70,7 +70,7 @@ pipeline {
             }
         }
         stage("Deploy Application Remotely"){
-            //sshPublisher(publishers: [sshPublisherDesc(configName: 'publish_server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "${jenkins_shell}", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+            sshPublisher(publishers: [sshPublisherDesc(configName: 'publish_server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "${jenkins_shell}", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
         }
     }
 
