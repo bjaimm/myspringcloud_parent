@@ -43,7 +43,7 @@ public class Result<T> implements Serializable {
 
         result.setSuccess(false);
         result.setCode(ResponseEnum.INTERNAL_SERVER_ERROR.getReponseCode());
-        result.setMessage(exception.getMessage());
+        result.setMessage(exception.getLocalizedMessage());
         result.setData(null);
 
         return result;

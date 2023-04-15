@@ -11,7 +11,7 @@ import java.text.ParseException;
 
 @Component
 public class JwtUtils {
-    public final static String JWT_HMAC_SECRET="adsjfdskfjdsalfjdslkfjdskfjdkjfdk";
+    public final static String JWT_HMAC_SECRET="thisissigningkeyfortoken";
     public String generateJWTByHMAC(String payloadParam, String secret) throws JOSEException {
         //创建JWS头，设置加密算法和类型
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.HS256)
