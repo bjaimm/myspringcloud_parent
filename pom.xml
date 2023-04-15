@@ -11,11 +11,11 @@
     <modules>
         <module>microservice_user</module>
         <module>eureka</module>
-        <module>micorservice_movie</module>
+        <module>microservice_movie</module>
         <module>hystrixdashboard</module>
         <module>zuulgateway</module>
         <module>microservice_product</module>
-        <module>springcloudconfig</module>
+        <module>microservice_config</module>
         <module>microservice_gateway</module>
         <module>microservice_order</module>
         <module>microservice_commons</module>
@@ -31,7 +31,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.2.RELEASE</version>
+        <version>2.3.12.RELEASE</version>
     </parent>
 
     <repositories>
@@ -64,8 +64,17 @@
             </dependency>
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
-                <artifactId>spring-cloud-alibaba</artifactId>
-                <version>2.2.7.RELEASE</version>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>2.2.10-RC1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>2.20.32</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -75,6 +84,19 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.0.1.RELEASE</version>
+                <!--JAR包瘦身打包插件，
+                java -Dthin.dryrun=true 预热下载依赖，不启动应用
+                     -Dthin.root=. 指定在当前目录生成repository存放依赖
+                     -jar microservice-config-1.0-SNAPSHOT.jar
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.springframework.boot.experimental</groupId>
+                        <artifactId>spring-boot-thin-layout</artifactId>
+                        <version>1.0.27.RELEASE</version>
+                    </dependency>
+                </dependencies>
+                -->
             </plugin>
         </plugins>
     </build>
