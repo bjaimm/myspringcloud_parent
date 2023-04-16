@@ -50,6 +50,18 @@ public class ProductController {
         return "添加成功";
     }
 
+    @DeleteMapping(value = "/{productId}")
+    public String delete(@PathVariable Integer productId){
+        productService.removeById(productId);
+        return "删除成功";
+    }
+
+    @PutMapping
+    public String update(@RequestBody @Valid ProductPo product) {
+        productService.updateById(product);
+        return "修改成功";
+    }
+
     @RequestMapping(method = RequestMethod.PUT,value="/deduceStock",produces = "application/json")
     @Transactional
     public String deduceStock(@RequestBody List<OrderDetailDto> orderDetailDto){
