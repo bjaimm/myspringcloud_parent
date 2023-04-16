@@ -9,13 +9,17 @@ import com.herosoft.commons.results.Result;
 import com.herosoft.user.async.AsyncService;
 import com.herosoft.user.dao.UserDao;
 import com.herosoft.user.events.ObservationEvent;
+import com.herosoft.user.po.ChatMessage;
+import com.herosoft.user.po.Greeting;
 import com.herosoft.user.po.UserPo;
+import com.herosoft.user.aws.DynamoDBEnhanced;
 import com.herosoft.user.service.RabbitMqSender;
+import com.herosoft.user.aws.SnsPublishMessage;
+import com.herosoft.user.aws.SqsMessageService;
 import com.herosoft.user.service.impl.UserServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ApplicationContext;
@@ -30,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.util.*;
@@ -68,6 +73,14 @@ public class UserController {
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private DynamoDBEnhanced dynamoDBEnhanced;
+    @Autowired
+    private SnsPublishMessage snsPublishMessage;
+
+    @Autowired
+    private SqsMessageService sqsMessageService;
 
     private static Map<String,String> staticMap = new HashMap<>();
     private Integer count=0;
@@ -148,7 +161,7 @@ public class UserController {
     @RequestMapping(value = "/checkstatus",method = RequestMethod.GET)
     public String getStatus(){
 
-        return "用户微服务状态正常 Port:"+environment.getProperty("local.server.port")+" token secret:"+environment.getProperty("token.secret");
+        return "用户微服务状态正常 Port:"+environment.getProperty("local.server.port")+" token secret:"+environment.getProperty("token.secret")+" hostname:"+System.getenv("HOSTNAME");
     }
     @RequestMapping(value = "/userhandler/{userType}")
     public String userHandler(@PathVariable String userType){
@@ -339,4 +352,59 @@ public class UserController {
         log.info("重试次数用完，触发recover方法。。。exception:"+e.getLocalizedMessage());
     }
 
+    @RequestMapping(value = "/aws/createS3Bucket")
+    public String createS3Bucket(@RequestParam String bucketName){
+       return "S3 Bucket创建成功";
+    }
+
+    @GetMapping("/aws/")
+    public ModelAndView greetingForm() {
+        ModelAndView mav = new ModelAndView();
+
+        mav.addObject(new Greeting());
+        mav.setViewName("greeting");
+        return mav;
+    }
+
+    @GetMapping("/aws/chat")
+    public ModelAndView chatForm() {
+        ModelAndView mav = new ModelAndView();
+
+        mav.addObject(new ChatMessage());
+        mav.setViewName("chat");
+        return mav;
+    }
+    @PostMapping("/aws/greeting")
+    public ModelAndView greetingSubmit(@ModelAttribute Greeting greeting){
+        ModelAndView mav = new ModelAndView();
+
+        dynamoDBEnhanced.insertDynamoDB(greeting);
+
+        snsPublishMessage.publishMessage(greeting.getId());
+
+        mav.setViewName("result");
+        return mav;
+
+    }
+
+    @PostMapping("/aws/chat/response")
+    public ModelAndView chatSubmit(@ModelAttribute ChatMessage chatMessage){
+        ModelAndView mav = new ModelAndView();
+
+        UUID uuid = UUID.randomUUID();
+
+        chatMessage.setId(uuid.toString());
+
+        sqsMessageService.processMessage(chatMessage);
+
+        mav.setViewName("chatResponse");
+        return mav;
+
+    }
+
+    @PostMapping("/postMessage")
+    public String postMessage(@RequestBody UserDto requestBody){
+        log.info("收到post请求。。。username:{}",requestBody.getUserName());
+        return "返回post请求响应数据";
+    }
 }
