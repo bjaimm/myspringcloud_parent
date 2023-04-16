@@ -64,7 +64,7 @@ pipeline {
                 //Compile,Package,Build image
                 sh "mvn -f ${ServiceName} clean package dockerfile:build -DskipTests=true"
 
-                //Tag image
+                //Tag image1
                 sh "docker tag ${imageName} ${repositoryUrl}/${projectName}/${imageName}"
 
                 //Push image
