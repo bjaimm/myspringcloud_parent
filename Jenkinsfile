@@ -53,6 +53,8 @@ pipeline {
             }
             steps{
                 sh "mvn -f microservice_commons clean install -DskipTests=true"
+                //编译父工程，确保pom文件在repository中出现
+                sh "mvn clean install -DskipTests=true -N"
             }
         }
         stage("Compile,Package Microservice and Build Push Docker Image"){
