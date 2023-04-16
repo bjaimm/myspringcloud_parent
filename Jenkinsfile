@@ -61,19 +61,19 @@ pipeline {
                  maven "Maven3.8.6"
             }
             steps{
+                dir("") {
+                    //Compile,Package,Build image
+                    sh "mvn -f ${ServiceName} clean package dockerfile:build -DskipTests=true"
 
-                //Compile,Package,Build image
-                sh "mvn -f ${ServiceName} clean package dockerfile:build -DskipTests=true"
+                    //Tag image
+                    sh "docker tag ${imageName} ${repositoryUrl}/${projectName}/${imageName}"
 
-                //Tag image
-                sh "docker tag ${imageName} ${repositoryUrl}/${projectName}/${imageName}"
-
-                //Push image
-                withCredentials([usernamePassword(credentialsId: 'de607c77-1073-4e39-bbcc-73fdab617162', passwordVariable: 'password', usernameVariable: 'username')]) {
-                    sh "docker login -u ${username} -p ${password} ${repositoryUrl}"
-                    sh "docker push ${repositoryUrl}/${projectName}/${imageName}"
+                    //Push image
+                    withCredentials([usernamePassword(credentialsId: 'de607c77-1073-4e39-bbcc-73fdab617162', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        sh "docker login -u ${username} -p ${password} ${repositoryUrl}"
+                        sh "docker push ${repositoryUrl}/${projectName}/${imageName}"
+                    }
                 }
-
             }
         }
         stage("Deploy Application Remotely"){
