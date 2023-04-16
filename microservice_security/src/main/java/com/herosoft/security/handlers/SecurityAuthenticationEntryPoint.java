@@ -24,8 +24,11 @@ import java.io.Serializable;
 public class SecurityAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
-        log.info("认证异常：{}",e.getLocalizedMessage());
-
+        log.info("认证异常:{}, requestUri:{}",e.getLocalizedMessage(),httpServletRequest.getRequestURI());
+        log.info("method:{}",httpServletRequest.getMethod());
+        log.info("pathInfo:{}",httpServletRequest.getPathInfo());
+        log.info("requestUrl:{}",httpServletRequest.getRequestURL());
+        log.info("servletPath:{}",httpServletRequest.getServletPath());
         String jsonException = JSON.toJSONString(new Result<>(false,
                 ResponseEnum.NO_AUTHENTICATION.getReponseCode(),
                 ResponseEnum.NO_AUTHENTICATION.getReponseMessage(),
