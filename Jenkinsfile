@@ -97,12 +97,14 @@ pipeline {
                     for (i = 0; i < SelectedServiceNames.length; i++) {
 
                         CurrentServiceName = SelectedServiceNames[i].split("@")[0]
-                        //设置SSH远程部署脚本命令行
-                        jenkins_shell= "/opt/jenkins_shell/deployCluster.sh $CurrentServiceName $repositoryUrl $projectName $tag >> /opt/jenkins_shell/deployCluster.log"
 
                         for (j = 0; j < SelectedNodes.length; j++) {
+                            CurrentNodeName = SelectedNodes[j].split("@")[0]
+                            CurrentNodeIP = SelectedNodes[j].split("@")[1]
 
-                            CurrentNodeName = SelectedNodes[j]
+                            //设置SSH远程部署脚本命令行
+                            jenkins_shell= "/opt/jenkins_shell/deployCluster.sh $CurrentServiceName $repositoryUrl $projectName $tag $CurrentNodeIP >> /opt/jenkins_shell/deployCluster.log"
+
                             sshPublisher(publishers: [sshPublisherDesc(configName: "${CurrentNodeName}", transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "${jenkins_shell}", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
                         }
                     }
