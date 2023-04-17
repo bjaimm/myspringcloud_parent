@@ -38,11 +38,11 @@ pipeline {
 
             steps {
                 script {
-                    echo $SelectedServiceNames
+                    echo SelectedServiceNames
                     for (i = 0; i < SelectedServiceNames.length; i++) {
-                        echo $SelectedServiceNames[i]
+                        echo SelectedServiceNames[i]
                         CurrentServiceName = SelectedServiceNames[i].split("@")[0]
-                        echo $CurrentServiceName
+                        echo CurrentServiceName
                         //设置当前工作目录
                         dir("${CurrentServiceName}") {
                             sh "mkdir -p target/classes"
