@@ -38,7 +38,7 @@ pipeline {
 
             steps {
                 script {
-                    echo SelectedServiceNames
+
                     for (i = 0; i < SelectedServiceNames.length; i++) {
                         echo SelectedServiceNames[i]
                         CurrentServiceName = SelectedServiceNames[i].split("@")[0]
