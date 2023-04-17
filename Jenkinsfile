@@ -38,18 +38,17 @@ pipeline {
             tools {
                 jdk "jdk17"
             }
+            for(i=0;i<${SelectedServiceNames}.length;i++) {
 
-            steps{
-                for(i=0;i<${SelectedServiceNames}.length;i++) {
-
-                    ServiceName = "${SelectedServiceNames}".split("@")[0]
-                    //设置当前工作目录
-                    dir("${ServiceName}") {
-                        withSonarQubeEnv('sonarqube-server') {
-                            sh "${scannerHome}/bin/sonar-scanner"
+                ServiceName = "${SelectedServiceNames}".split("@")[0]
+                steps{
+                        //设置当前工作目录
+                        dir("${ServiceName}") {
+                            withSonarQubeEnv('sonarqube-server') {
+                                sh "${scannerHome}/bin/sonar-scanner"
+                            }
                         }
                     }
-                }
              }
 
         }
