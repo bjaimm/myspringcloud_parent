@@ -1,6 +1,9 @@
 //设置镜像版本
 tag ="latest"
 
+//获取用户选择部署的服务项
+SelectedServiceNames = "${ServiceName}".split(",")
+
 //设置镜像名
 imageName = "${ServiceName}:${tag}"
 
@@ -37,10 +40,14 @@ pipeline {
             }
 
             steps{
-                //设置当前工作目录
-                dir("${ServiceName}"){
-                    withSonarQubeEnv('sonarqube-server'){
-                        sh "${scannerHome}/bin/sonar-scanner"
+                for(i=0;i<${SelectedServiceNames}.length;i++) {
+
+                    ServiceName = "${SelectedServiceNames}".split("@")[0]
+                    //设置当前工作目录
+                    dir("${ServiceName}") {
+                        withSonarQubeEnv('sonarqube-server') {
+                            sh "${scannerHome}/bin/sonar-scanner"
+                        }
                     }
                 }
              }
