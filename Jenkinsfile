@@ -38,7 +38,7 @@ pipeline {
 
             steps {
                 script {
-                    if(!${IsSonarScanSkipped}) {
+                    if("${IsSonarScanSkipped}"==false) {
                         for (i = 0; i < SelectedServiceNames.length; i++) {
                             echo SelectedServiceNames[i]
                             CurrentServiceName = SelectedServiceNames[i].split("@")[0]
@@ -76,7 +76,7 @@ pipeline {
             }
             steps{
                 script {
-                    if(!${IsServiceBuildSkipped}) {
+                    if("${IsServiceBuildSkipped}"==false) {
                         for (i = 0; i < SelectedServiceNames.length; i++) {
 
                             CurrentServiceName = SelectedServiceNames[i].split("@")[0]
