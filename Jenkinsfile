@@ -4,6 +4,9 @@ tag ="latest"
 //获取用户选择部署的服务项
 SelectedServiceNames = "${ServiceName}".split(",")
 
+//获取用户选择部署的服务器节点
+SelectedNodes="${PublishServer}".split(",")
+
 //设置镜像名
 imageName = "${ServiceName}:${tag}"
 
@@ -15,9 +18,6 @@ projectName="microservice-demo"
 //Windows节点下这个变量中俄路径隔离符会被去除
 //scannerHome = tool name: 'sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
 scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
-
-//设置SSH远程部署脚本命令行
-jenkins_shell= "/opt/jenkins_shell/deploy.sh $ServiceName $repositoryUrl $projectName $tag >> /opt/jenkins_shell/deploy.log"
 
 pipeline {
     agent any
@@ -72,23 +72,42 @@ pipeline {
                  maven "Maven3.8.6"
             }
             steps{
-                //Compile,Package,Build image
-                sh "mvn -f ${ServiceName} clean package dockerfile:build -DskipTests=true"
+                script {
+                    for (i = 0; i < SelectedServiceNames.length; i++) {
 
-                //Tag image1
-                sh "docker tag ${imageName} ${repositoryUrl}/${projectName}/${imageName}"
+                        CurrentServiceName = SelectedServiceNames[i].split("@")[0]
 
-                //Push image
-                withCredentials([usernamePassword(credentialsId: 'de607c77-1073-4e39-bbcc-73fdab617162', passwordVariable: 'password', usernameVariable: 'username')]) {
-                    sh "docker login -u ${username} -p ${password} ${repositoryUrl}"
-                    sh "docker push ${repositoryUrl}/${projectName}/${imageName}"
+                        //Compile,Package,Build image
+                        sh "mvn -f ${CurrentServiceName} clean package dockerfile:build -DskipTests=true"
+
+                        //Tag image1
+                        sh "docker tag ${imageName} ${repositoryUrl}/${projectName}/${imageName}"
+
+                        //Push image
+                        withCredentials([usernamePassword(credentialsId: 'de607c77-1073-4e39-bbcc-73fdab617162', passwordVariable: 'password', usernameVariable: 'username')]) {
+                            sh "docker login -u ${username} -p ${password} ${repositoryUrl}"
+                            sh "docker push ${repositoryUrl}/${projectName}/${imageName}"
+                        }
+                    }
                 }
-
             }
         }
         stage("Deploy Application Remotely"){
             steps {
-                sshPublisher(publishers: [sshPublisherDesc(configName: 'publish_server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "${jenkins_shell}", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+                script {
+                    for (i = 0; i < SelectedServiceNames.length; i++) {
+
+                        CurrentServiceName = SelectedServiceNames[i].split("@")[0]
+                        //设置SSH远程部署脚本命令行
+                        jenkins_shell= "/opt/jenkins_shell/deployCluster.sh $CurrentServiceName $repositoryUrl $projectName $tag >> /opt/jenkins_shell/deployCluster.log"
+
+                        for (j = 0; j < SelectedNodes.length; j++) {
+
+                            CurrentNodeName = SelectedNodes[j]
+                            sshPublisher(publishers: [sshPublisherDesc(configName: "${CurrentNodeName}", transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: "${jenkins_shell}", execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+                        }
+                    }
+                }
             }
         }
     }
