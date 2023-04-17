@@ -105,6 +105,7 @@ pipeline {
         stage("Deploy Application Remotely"){
             steps {
                 script {
+
                     for (i = 0; i < SelectedServiceNames.length; i++) {
 
                         CurrentServiceName = SelectedServiceNames[i].split("@")[0]
@@ -112,6 +113,9 @@ pipeline {
                         for (j = 0; j < SelectedNodes.length; j++) {
                             CurrentNodeName = SelectedNodes[j].split("@")[0]
                             CurrentNodeIP = SelectedNodes[j].split("@")[1]
+
+                            echo CurrentNodeName
+                            echo CurrentNodeIP
 
                             //设置SSH远程部署脚本命令行
                             jenkins_shell= "/opt/jenkins_shell/cluster/deploy_cluster.sh $CurrentServiceName $repositoryUrl $projectName $tag $CurrentNodeIP >> /opt/jenkins_shell/cluster/deploy_cluster.log"
