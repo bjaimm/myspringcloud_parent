@@ -38,18 +38,22 @@ pipeline {
 
             steps {
                 script {
-
-                    for (i = 0; i < SelectedServiceNames.length; i++) {
-                        echo SelectedServiceNames[i]
-                        CurrentServiceName = SelectedServiceNames[i].split("@")[0]
-                        echo CurrentServiceName
-                        //设置当前工作目录
-                        dir("${CurrentServiceName}") {
-                            sh "mkdir -p target/classes"
-                            withSonarQubeEnv('sonarqube-server') {
-                                sh "${scannerHome}/bin/sonar-scanner"
+                    if(!${IsSonarScanSkipped}) {
+                        for (i = 0; i < SelectedServiceNames.length; i++) {
+                            echo SelectedServiceNames[i]
+                            CurrentServiceName = SelectedServiceNames[i].split("@")[0]
+                            echo CurrentServiceName
+                            //设置当前工作目录
+                            dir("${CurrentServiceName}") {
+                                sh "mkdir -p target/classes"
+                                withSonarQubeEnv('sonarqube-server') {
+                                    sh "${scannerHome}/bin/sonar-scanner"
+                                }
                             }
                         }
+                    }
+                    else{
+                        echo "SonarScan step is not required per user input"
                     }
                 }
             }
@@ -72,23 +76,28 @@ pipeline {
             }
             steps{
                 script {
-                    for (i = 0; i < SelectedServiceNames.length; i++) {
+                    if(!${IsServiceBuildSkipped}) {
+                        for (i = 0; i < SelectedServiceNames.length; i++) {
 
-                        CurrentServiceName = SelectedServiceNames[i].split("@")[0]
-                        //设置镜像名
-                        imageName = "${CurrentServiceName}:${tag}"
+                            CurrentServiceName = SelectedServiceNames[i].split("@")[0]
+                            //设置镜像名
+                            imageName = "${CurrentServiceName}:${tag}"
 
-                        //Compile,Package,Build image
-                        sh "mvn -f ${CurrentServiceName} clean package dockerfile:build -DskipTests=true"
+                            //Compile,Package,Build image
+                            sh "mvn -f ${CurrentServiceName} clean package dockerfile:build -DskipTests=true"
 
-                        //Tag image1
-                        sh "docker tag ${imageName} ${repositoryUrl}/${projectName}/${imageName}"
+                            //Tag image1
+                            sh "docker tag ${imageName} ${repositoryUrl}/${projectName}/${imageName}"
 
-                        //Push image
-                        withCredentials([usernamePassword(credentialsId: 'de607c77-1073-4e39-bbcc-73fdab617162', passwordVariable: 'password', usernameVariable: 'username')]) {
-                            sh "docker login -u ${username} -p ${password} ${repositoryUrl}"
-                            sh "docker push ${repositoryUrl}/${projectName}/${imageName}"
+                            //Push image
+                            withCredentials([usernamePassword(credentialsId: 'de607c77-1073-4e39-bbcc-73fdab617162', passwordVariable: 'password', usernameVariable: 'username')]) {
+                                sh "docker login -u ${username} -p ${password} ${repositoryUrl}"
+                                sh "docker push ${repositoryUrl}/${projectName}/${imageName}"
+                            }
                         }
+                    }
+                    else{
+                        echo "ServiceBuild step is not required per user input"
                     }
                 }
             }
