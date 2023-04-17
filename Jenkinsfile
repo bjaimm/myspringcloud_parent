@@ -27,9 +27,9 @@ pipeline {
             steps{
                 checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'f2f81612-da80-4372-9d5f-f19bb42c442b', url: 'https://github.com/bjaimm/myspringcloud_parent.git']])
 
-                dir("${ServiceName}") {
+                /*dir("${ServiceName}") {
                     sh "mkdir -p target/classes"
-                }
+                }*/
             }
         }
 
@@ -42,9 +42,10 @@ pipeline {
             steps {
                 script {
                     for(i=0;i<${SelectedServiceNames}.length;i++) {
-                        ServiceName = "${SelectedServiceNames}".split("@")[0]
+                        CurrentServiceName = ${SelectedServiceNames}[i].split("@")[0]
                         //设置当前工作目录
-                        dir("${ServiceName}") {
+                        dir("${CurrentServiceName}") {
+                            sh "mkdir -p target/classes"
                             withSonarQubeEnv('sonarqube-server') {
                                 sh "${scannerHome}/bin/sonar-scanner"
                                 }
