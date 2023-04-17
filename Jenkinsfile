@@ -7,9 +7,6 @@ SelectedServiceNames = "${ServiceName}".split(",")
 //获取用户选择部署的服务器节点
 SelectedNodes="${PublishServer}".split(",")
 
-//设置镜像名
-imageName = "${ServiceName}:${tag}"
-
 //如果是本地私有镜像仓库，如Harbor，需要设置repositoryUrl和projectName
 //如果是dockerhub,则不需要设置repository
 repositoryUrl="9.197.4.240:85"
@@ -76,6 +73,8 @@ pipeline {
                     for (i = 0; i < SelectedServiceNames.length; i++) {
 
                         CurrentServiceName = SelectedServiceNames[i].split("@")[0]
+                        //设置镜像名
+                        imageName = "${CurrentServiceName}:${tag}"
 
                         //Compile,Package,Build image
                         sh "mvn -f ${CurrentServiceName} clean package dockerfile:build -DskipTests=true"
