@@ -41,8 +41,8 @@ pipeline {
 
             steps {
                 script {
-                    for(i=0;i<${SelectedServiceNames}.length;i++) {
-                        CurrentServiceName = ${SelectedServiceNames}[i].split("@")[0]
+                    for(i=0;i<SelectedServiceNames.length;i++) {
+                        CurrentServiceName = SelectedServiceNames[i].split("@")[0]
                         //设置当前工作目录
                         dir("${CurrentServiceName}") {
                             sh "mkdir -p target/classes"
