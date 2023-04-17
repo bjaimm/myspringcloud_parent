@@ -38,19 +38,21 @@ pipeline {
 
             steps {
                 script {
-                    for(i=0;i<SelectedServiceNames.length;i++) {
+                    echo $SelectedServiceNames
+                    for (i = 0; i < SelectedServiceNames.length; i++) {
+                        echo $SelectedServiceNames[i]
                         CurrentServiceName = SelectedServiceNames[i].split("@")[0]
+                        echo $CurrentServiceName
                         //设置当前工作目录
                         dir("${CurrentServiceName}") {
                             sh "mkdir -p target/classes"
                             withSonarQubeEnv('sonarqube-server') {
                                 sh "${scannerHome}/bin/sonar-scanner"
-                                }
                             }
                         }
+                    }
                 }
             }
-
         }
         stage("Common Modules Installation"){
             //设置Maven引用，在Jenkins全局工具里设置
