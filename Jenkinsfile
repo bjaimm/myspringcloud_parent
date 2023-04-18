@@ -17,7 +17,9 @@ projectName="microservice-demo"
 scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
 
 pipeline {
-    agent any
+    agent {
+        label "slavenodes"
+    }
 
     stages{
         stage('Pull Code') {
