@@ -24,8 +24,8 @@ pipeline {
     stages{
         stage('Pull Code') {
             steps{
-                checkout scmGit(branches: [[name: "*/${Branch}"]], extensions: [], userRemoteConfigs: [[credentialsId: 'f2f81612-da80-4372-9d5f-f19bb42c442b', url: 'https://github.com/bjaimm/myspringcloud_parent.git']])
-
+                //checkout scmGit(branches: [[name: "*/${Branch}"]], extensions: [], userRemoteConfigs: [[credentialsId: 'f2f81612-da80-4372-9d5f-f19bb42c442b', url: 'https://github.com/bjaimm/myspringcloud_parent.git']])
+                checkout scmGit(branches: [[name: "*/${Branch}"]], extensions: [], userRemoteConfigs: [[credentialsId: 'eb5f023a-abf9-4307-90ec-2c949f2b00ba', url: 'git@github.com:bjaimm/myspringcloud_parent.git']])
                 /*dir("${ServiceName}") {
                     sh "mkdir -p target/classes"
                 }*/
