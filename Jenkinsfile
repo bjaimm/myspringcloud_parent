@@ -18,7 +18,7 @@ scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarR
 
 pipeline {
     agent {
-        label "slavenodes"
+        label "master"
     }
 
     stages{
