@@ -66,6 +66,8 @@ pipeline {
                 maven "Maven3.8.6"
             }
             steps{
+                sh "echo $MAVEN_HOME"
+                sh "echo $PATH"
                 sh "mvn -f microservice_commons clean install -DskipTests=true"
                 //编译父工程，确保pom文件在repository中出现
                 sh "mvn clean install -DskipTests=true -N"
