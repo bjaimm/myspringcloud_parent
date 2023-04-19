@@ -62,9 +62,9 @@ pipeline {
         }
         stage("Common Modules Installation"){
             //设置Maven引用，在Jenkins全局工具里设置
-            tools{
+            /*tools{
                 maven "Maven3.8.6"
-            }
+            }*/
             steps{
                 sh "/usr/local/apache-maven-3.8.6/bin/mvn -f microservice_commons clean install -DskipTests=true"
                 //编译父工程，确保pom文件在repository中出现
