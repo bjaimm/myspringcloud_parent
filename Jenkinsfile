@@ -40,7 +40,7 @@ pipeline {
 
             steps {
                 script {
-                    if("${IsSonarScanSkipped}"==false) {
+                    if("${IsSonarScanSkipped}"=="false") {
                         for (i = 0; i < SelectedServiceNames.length; i++) {
                             echo SelectedServiceNames[i]
                             CurrentServiceName = SelectedServiceNames[i].split("@")[0]
