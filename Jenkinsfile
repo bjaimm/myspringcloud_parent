@@ -12,13 +12,18 @@ SelectedNodes="${PublishServer}".split(",")
 repositoryUrl="9.197.4.240:85"
 projectName="microservice-demo"
 
-//Windows节点下这个变量中俄路径隔离符会被去除
+//如果工具配置是自动下载的，那么通过tool命令返回的工具路径中会缺失路径隔离符"\"
+//所以最好是自行下载好工具，再在Jenkins中配置路径
 //scannerHome = tool name: 'sonarqube-scanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
+//scannerHome = "C:/ProgramData/Jenkins/.jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/sonarqube-scanner"
 
 pipeline {
     agent {
         label "${JenkinsNodes}"
+    }
+
+    environment{
+        scannerHome = tool 'sonarqube-scanner'
     }
 
     stages{
@@ -78,7 +83,7 @@ pipeline {
             }
             steps{
                 script {
-                    if("${IsServiceBuildSkipped}"==false) {
+                    if("${IsServiceBuildSkipped}"=="false") {
                         for (i = 0; i < SelectedServiceNames.length; i++) {
 
                             CurrentServiceName = SelectedServiceNames[i].split("@")[0]
