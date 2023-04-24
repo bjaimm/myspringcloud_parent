@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -21,10 +22,27 @@ public class OrderInfoDto {
     private int orderStatus;
     @ExcelProperty("订单状态")
     private String orderStatusMessage;
+
+    private Integer orderUserId;
+
+    private String orderUserName;
+    private Integer createUserId;
+
+    private String createUserName;
+
+    private Integer updateUserId;
+
+    private String updateUserName;
+
+    private LocalDateTime createDateTime;
+
+    private LocalDateTime updateDateTime;
+
     private List<OrderDetailDto> orderDetailList;
 
     public OrderInfoDto(OrderHeaderPo orderHeaderPo) {
         this.orderHeaderId=orderHeaderPo.getOrderHeaderId();
+        this.orderUserId=orderHeaderPo.getUserId();
         this.orderStatus=orderHeaderPo.getStatus();
         this.orderAmount=orderHeaderPo.getOrderAmount();
         this.orderStatusMessage = OrderStatus.values()[orderHeaderPo.getStatus()].getOrderStatusMessage();

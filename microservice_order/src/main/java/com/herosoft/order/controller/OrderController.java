@@ -144,7 +144,7 @@ public class OrderController {
     public Page<OrderHeaderPo> listOrderHeaderPage(@PathVariable long pageNum,
                                                    @PathVariable long pageSize){
         QueryWrapper<OrderHeaderPo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("order_amount",10000.00);
+        //queryWrapper.eq("order_amount",10000.00);
 
         Page<OrderHeaderPo> page = new Page<>(pageNum, pageSize);
         return orderHeaderService.listPage(page,queryWrapper);
@@ -172,6 +172,24 @@ public class OrderController {
             dest.setOrderStatus(source.getStatus());//因为两个Dto的字段名不一样，所以这里需要再单独复制一下
             dest.setOrderStatusMessage(OrderStatus.values()[source.getStatus()].getOrderStatusMessage());
 
+            String jsonString = JSON.toJSONString(userService.findById(source.getUserId()).getData());
+            JSONObject jsonObject = JSON.parseObject(jsonString);
+
+            String username = jsonObject.getString("userName");
+
+            jsonString = JSON.toJSONString(userService.findById(source.getCreateBy()).getData());
+            String createUserName = jsonObject.getString("userName");
+            jsonString = JSON.toJSONString(userService.findById(source.getUpdateBy()).getData());
+            String updateUserName = jsonObject.getString("userName");
+
+            dest.setOrderUserId(source.getUserId());
+            dest.setOrderUserName(username);
+            dest.setCreateUserName(createUserName);
+            dest.setUpdateUserName(updateUserName);
+            dest.setCreateUserId(source.getCreateBy());
+            dest.setCreateDateTime(source.getCreateTime());
+            dest.setUpdateUserId(source.getUpdateBy());
+            dest.setUpdateDateTime(source.getUpdateTime());
             return dest;
         });
 
@@ -202,6 +220,12 @@ public class OrderController {
                     .map(source->{
                         OrderDetailDto dest = new OrderDetailDto();
                         BeanUtils.copyProperties(source,dest);
+
+                        String jsonStringProduct = JSON.toJSONString(productService.findById(source.getProductId()).getData());
+                        JSONObject jsonObjectProduct = JSON.parseObject(jsonStringProduct);
+
+                        dest.setProductName(jsonObjectProduct.getString("productName"));
+
                         return dest;
                     }).collect(Collectors.toList()));
         });
