@@ -12,5 +12,6 @@ public class OrderDetailDto {
     private int orderDetailId;
     private int productId;
     private String productName;
+    private Double productPrice;
     private int productQty;
 }

@@ -18,6 +18,7 @@ import com.herosoft.order.config.RabbitMqConfig;
 import com.herosoft.order.constants.OrderConstants;
 import com.herosoft.order.dto.OrderDetailDto;
 import com.herosoft.order.dto.OrderInfoDto;
+import com.herosoft.order.dto.OrderQueryDto;
 import com.herosoft.order.dto.OrderRequestDto;
 import com.herosoft.order.enums.OrderStatus;
 import com.herosoft.order.po.OrderDetailPo;
@@ -26,6 +27,7 @@ import com.herosoft.order.services.impl.OrderDetailServiceImpl;
 import com.herosoft.order.services.impl.OrderHeaderServiceImpl;
 import com.herosoft.order.services.impl.OrderServiceImpl;
 import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.amqp.AmqpException;
@@ -46,6 +48,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/orders")
 @Api(value = "订单管理接口")
+@Slf4j
 public class OrderController {
     @Autowired
     private OrderHeaderServiceImpl orderHeaderService;
@@ -160,9 +163,13 @@ public class OrderController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/listOrderInfoPage2/{pageNum}/{pageSize}")
     public IPage<OrderInfoDto> listOrderInfoPage2(@PathVariable long pageNum,
-                                                  @PathVariable long pageSize){
+                                                  @PathVariable long pageSize, OrderQueryDto queryDto){
+
+        log.info("queryDto:{}",queryDto);
         //生成主表的分页对象
-        Page<OrderHeaderPo> orderHeaderPage = orderHeaderService.page(new Page<>(pageNum, pageSize), Wrappers.lambdaQuery(OrderHeaderPo.class));
+        Page<OrderHeaderPo> orderHeaderPage = orderHeaderService.page(new Page<>(pageNum, pageSize),
+                Wrappers.lambdaQuery(OrderHeaderPo.class)
+                        .eq(queryDto.getOrderStatus()!=null,OrderHeaderPo::getStatus,queryDto.getOrderStatus()));
 
         //转换为DTO的分页对象
         IPage<OrderInfoDto> orderInfoPage = orderHeaderPage.convert(source -> {
@@ -225,6 +232,7 @@ public class OrderController {
                         JSONObject jsonObjectProduct = JSON.parseObject(jsonStringProduct);
 
                         dest.setProductName(jsonObjectProduct.getString("productName"));
+                        dest.setProductPrice(jsonObjectProduct.getDouble("productPrice"));
 
                         return dest;
                     }).collect(Collectors.toList()));
