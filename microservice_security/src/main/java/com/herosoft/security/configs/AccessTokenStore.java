@@ -47,12 +47,14 @@ public class AccessTokenStore {
 
                 if(authentication.getPrincipal() instanceof SecurityUserDetails) {
                     info.put("userid", ((SecurityUserDetails) authentication.getPrincipal()).getUserId());
+                    info.put("username", ((SecurityUserDetails) authentication.getPrincipal()).getUsername());
                 }
                 else{
                     log.info("Oauth2的refresh token中产生的authentication对象，没有自定义的字段，需要重新获取放到刷新的token中");
                     SecurityUserDetails securityUserDetails = (SecurityUserDetails) securityUserDetailService.loadUserByUsername((String) authentication.getPrincipal());
 
                     info.put("userid",securityUserDetails.getUserId());
+                    info.put("username",securityUserDetails.getUsername());
                 }
 
                 ((DefaultOAuth2AccessToken)accessToken).setAdditionalInformation(info);
