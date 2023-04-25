@@ -9,7 +9,7 @@ import java.util.Date;
 @Component
 public class ScheduleExample {
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    //@Scheduled(cron = "0/5 * * * * ?")
     public void schedulePrint(){
         System.out.println("定时任务打印执行，当前时间："+(new Date()));
     }
