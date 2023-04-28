@@ -1,9 +1,13 @@
 package com.herosoft.product.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.herosoft.commons.dto.OrderDetailDto;
 import com.herosoft.commons.dto.ProductDto;
 import com.herosoft.commons.results.Result;
+import com.herosoft.product.dto.ProductQueryDto;
 import com.herosoft.product.po.ProductPo;
 import com.herosoft.product.service.impl.ProductServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +46,24 @@ public class ProductController {
         }).collect(Collectors.toList());
 
         return productDtoList;
+    }
+
+    @RequestMapping(method = RequestMethod.GET,value = "/listpage/{pageNum}/{pageSize}")
+    public IPage<ProductDto> listpage(@PathVariable long pageNum,
+                                      @PathVariable long pageSize,
+                                      ProductQueryDto productQueryDto){
+
+        IPage<ProductDto> productListPage = productService.page(new Page<>(pageNum, pageSize),
+                Wrappers.lambdaQuery(ProductPo.class)
+                        .like(ProductPo::getProductName,productQueryDto.getProductName())).convert(source ->{
+            ProductDto productDto = new ProductDto();
+
+            BeanUtils.copyProperties(source,productDto);
+
+            return productDto;
+        });
+
+        return productListPage;
     }
 
     @RequestMapping(method = RequestMethod.POST)
