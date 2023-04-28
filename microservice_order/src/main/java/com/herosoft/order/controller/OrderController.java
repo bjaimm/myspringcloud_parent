@@ -169,7 +169,8 @@ public class OrderController {
         //生成主表的分页对象
         Page<OrderHeaderPo> orderHeaderPage = orderHeaderService.page(new Page<>(pageNum, pageSize),
                 Wrappers.lambdaQuery(OrderHeaderPo.class)
-                        .eq(queryDto.getOrderStatus()!=null,OrderHeaderPo::getStatus,queryDto.getOrderStatus()));
+                        .eq(queryDto.getOrderStatus()!=null,OrderHeaderPo::getStatus,queryDto.getOrderStatus())
+                        .orderByDesc(OrderHeaderPo::getCreateTime));
 
         //转换为DTO的分页对象
         IPage<OrderInfoDto> orderInfoPage = orderHeaderPage.convert(source -> {
